@@ -1,8 +1,7 @@
 import React from 'react';
 import './ProjectCard.css';
-import { FaJava, FaPython, FaReact } from 'react-icons/fa';
-import { SiJavascript, SiFlask, SiSqlite } from 'react-icons/si';
-import { MdAccessibility, MdPsychology, MdShowChart, MdArchitecture, MdWeb, MdVolunteerActivism } from 'react-icons/md';
+import { FaJava, FaPython, FaReact, FaCode } from 'react-icons/fa';
+import { SiJavascript, SiFlask, SiSqlite, SiTailwindcss } from 'react-icons/si';
 
 const tagToIcon = {
   "Java": <FaJava size={24} color="#1e293b" title="Java" />,
@@ -11,12 +10,7 @@ const tagToIcon = {
   "ReactJS": <FaReact size={24} color="#1e293b" title="ReactJS" />,
   "Flask": <SiFlask size={24} color="#1e293b" title="Flask" />,
   "SQLite": <SiSqlite size={24} color="#1e293b" title="SQLite" />,
-  "Accessibility": <MdAccessibility size={24} color="#1e293b" title="Accessibility" />,
-  "Cognitive Science": <MdPsychology size={24} color="#1e293b" title="Cognitive Science" />,
-  "Behavioral Economics": <MdShowChart size={24} color="#1e293b" title="Behavioral Economics" />,
-  "Algorithms": <MdArchitecture size={24} color="#1e293b" title="Algorithms" />,
-  "Web Design": <MdWeb size={24} color="#1e293b" title="Web Design" />,
-  "Non-Profit": <MdVolunteerActivism size={24} color="#1e293b" title="Non-Profit" />
+  "TailwindCSS": <SiTailwindcss size={24} color="#1e293b" title="TailwindCSS" />
 };
 
 const ProjectCard = ({ title, problem, solution, learned, tags, link }) => {
@@ -28,7 +22,7 @@ const ProjectCard = ({ title, problem, solution, learned, tags, link }) => {
           <div className="project-tech-icons">
             {tags.map(tag => (
               <span key={tag} className="tech-icon" title={tag}>
-                {tagToIcon[tag] || <MdArchitecture size={24} color="#1e293b" title={tag} />}
+                {tagToIcon[tag] || <FaCode size={24} color="#1e293b" title={tag} />}
               </span>
             ))}
           </div>

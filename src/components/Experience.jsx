@@ -15,10 +15,10 @@ const experienceData = [
     description: "Successfully managed and completed an extensive service project, demonstrating leadership, discipline, and commitment to community service."
   },
   {
-    title: "Computer Science Student",
+    title: "AI Software Engineer & Full Stack Student",
     organization: "Purdue University",
     period: "2024 - Present",
-    description: "Focusing on software development, algorithmic design, and cognitive accessibility research."
+    description: "Specializing in software development, algorithmic design, and cognitive accessibility research with a focus on AI-driven solutions."
   }
 ];
 

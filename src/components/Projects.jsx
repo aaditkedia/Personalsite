@@ -19,14 +19,6 @@ const projectsData = [
     link: "https://github.com/aaditkedia/RationalWallet"
   },
   {
-    title: "Purdue Dining Menu Scraper",
-    tags: ["Python", "Flask", "SQLite"],
-    problem: "The lack of a centralized, programmatically accessible way to track and view Purdue dining hall menus for students.",
-    solution: "Created a robust web scraper using Python, Flask, and SQLite that provides a clean REST API for real-time dining menu data.",
-    learned: "Gained proficiency in web scraping techniques (BeautifulSoup), REST API development, and managing concurrent HTTP requests efficiently.",
-    link: "https://github.com/aaditkedia/PurdueWebAppMenuScrapper"
-  },
-  {
     title: "CUECF Official Website",
     tags: ["JavaScript", "Web Design", "Non-Profit"],
     problem: "A non-profit community foundation required a professional online presence to coordinate eco-cleanup initiatives and engage volunteers.",

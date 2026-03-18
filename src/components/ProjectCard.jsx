@@ -1,3 +1,6 @@
+import React from 'react';
+import './ProjectCard.css';
+
 const tagToIcon = {
   "Java": "java",
   "Python": "python",

@@ -10,7 +10,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container nav-container">
         <div className="logo">
-          <a href="#home">PORTFOLIO</a>
+          <a href="#home">KEDIA</a>
         </div>
         <div className={`nav-links ${isOpen ? 'active' : ''}`}>
           <a href="#home" onClick={() => setIsOpen(false)}>Home</a>

@@ -29,10 +29,10 @@
   box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
 }
 
-.skill-icon img {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
+.skill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .skill-name {
@@ -52,9 +52,9 @@
     padding: 1rem;
   }
 
-  .skill-icon img {
-    width: 32px;
-    height: 32px;
+  .skill-icon svg {
+    width: 32px !important;
+    height: 32px !important;
   }
 
   .skill-name {

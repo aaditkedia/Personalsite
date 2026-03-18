@@ -1,5 +1,6 @@
 import React from 'react';
 import './Hero.css';
+import heroImage from '../assets/hero.png';
 
 const Hero = () => {
   return (
@@ -14,9 +15,14 @@ const Hero = () => {
           </p>
           <div className="hero-actions">
             <a href="#projects" className="btn btn-primary">View My Projects</a>
-            <a href="https://www.linkedin.com/in/aaditkedia/" target="_blank" rel="noopener noreferrer" className="btn btn-outline">LinkedIn</a>
-            <a href="https://github.com/aaditkedia" target="_blank" rel="noopener noreferrer" className="btn btn-outline">GitHub</a>
+            <div className="social-links">
+              <a href="https://www.linkedin.com/in/aaditkedia/" target="_blank" rel="noopener noreferrer" className="btn btn-outline">LinkedIn</a>
+              <a href="https://github.com/aaditkedia" target="_blank" rel="noopener noreferrer" className="btn btn-outline">GitHub</a>
+            </div>
           </div>
+        </div>
+        <div className="hero-image">
+          <img src={heroImage} alt="Aadit Kedia" />
         </div>
       </div>
     </section>

@@ -1,15 +1,35 @@
-import React from 'react';
-import './ProjectCard.css';
+const tagToIcon = {
+  "Java": "java",
+  "Python": "python",
+  "JavaScript": "javascript",
+  "ReactJS": "react",
+  "Flask": "flask",
+  "SQLite": "sqlite",
+  "Accessibility": "webaccessibility",
+  "Cognitive Science": "brain",
+  "Behavioral Economics": "chartbar",
+  "Algorithms": "cpu",
+  "Web Design": "layout",
+  "Non-Profit": "heart"
+};
 
 const ProjectCard = ({ title, problem, solution, learned, tags, link }) => {
   return (
     <div className="project-card">
       <div className="project-header">
-        <h3>{title}</h3>
-        <div className="project-tags">
-          {tags.map(tag => (
-            <span key={tag} className="tag">{tag}</span>
-          ))}
+        <div>
+          <h3>{title}</h3>
+          <div className="project-tech-icons">
+            {tags.map(tag => (
+              <img 
+                key={tag} 
+                src={`https://cdn.simpleicons.org/${tagToIcon[tag] || 'code'}/1e293b`} 
+                alt={tag} 
+                title={tag}
+                className="tech-icon"
+              />
+            ))}
+          </div>
         </div>
       </div>
       

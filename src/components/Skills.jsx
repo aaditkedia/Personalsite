@@ -1,3 +1,6 @@
+import React from 'react';
+import './Skills.css';
+
 const skillsData = [
   { name: "Java", icon: "java" },
   { name: "Python", icon: "python" },

@@ -4,12 +4,28 @@
   border-radius: 1rem;
   padding: 2.5rem;
   margin-bottom: 2.5rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: var(--primary);
+}
+
+.project-card:hover::before {
+  opacity: 1;
 }
 
 .project-header {
@@ -23,7 +39,7 @@
 
 .project-header h3 {
   margin-bottom: 0.5rem;
-  color: var(--primary);
+  color: var(--text);
   font-size: 1.75rem;
 }
 
@@ -38,6 +54,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0.8;
+  color: var(--primary);
 }
 
 .project-content {
@@ -51,25 +68,33 @@
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-muted);
+  color: var(--primary);
   margin-bottom: 0.75rem;
 }
 
 .project-section p {
   font-size: 1rem;
-  color: var(--text);
-  line-height: 1.5;
+  color: var(--text-muted);
+  line-height: 1.6;
 }
 
 .project-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   color: var(--primary);
   font-weight: 600;
   font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  transition: all 0.3s ease;
 }
 
 .project-link:hover {
-  text-decoration: underline;
+  background-color: var(--primary);
+  color: white;
+  text-decoration: none;
 }
 
 @media (max-width: 640px) {

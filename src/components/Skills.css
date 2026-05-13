@@ -10,7 +10,7 @@
 }
 
 .skill-widget {
-  background-color: white;
+  background-color: var(--surface);
   border: 1px solid var(--border);
   padding: 1.5rem;
   border-radius: 1.5rem;
@@ -19,14 +19,14 @@
   align-items: center;
   gap: 1rem;
   width: 140px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .skill-widget:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
   border-color: var(--primary);
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
 }
 
 .skill-icon {
@@ -38,7 +38,7 @@
 .skill-name {
   font-weight: 600;
   font-size: 0.95rem;
-  color: var(--primary);
+  color: var(--text);
 }
 
 @media (max-width: 640px) {

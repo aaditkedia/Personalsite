@@ -3,6 +3,22 @@ import ProjectCard from './ProjectCard';
 
 const projectsData = [
   {
+    title: "Dyslexia Low-Vision Reader",
+    tags: ["Python", "Accessibility"],
+    problem: "People with dyslexia and low vision face significant barriers when consuming digital text and literature.",
+    solution: "Developed an advanced reader application tailored for accessibility, offering custom text rendering, spacing, and contrast features.",
+    learned: "Gained practical experience in building inclusive software tools and applied research principles in human-computer interaction.",
+    link: "https://github.com/aaditkedia"
+  },
+  {
+    title: "Research Outreach Automation",
+    tags: ["Python", "Flask", "Automation"],
+    problem: "Academic researchers waste valuable time manually coordinating and communicating outreach initiatives.",
+    solution: "Engineered a web application to automate and streamline email communications and data entry for research outreach.",
+    learned: "Strengthened my understanding of backend web frameworks, scripting, and building end-to-end automation pipelines.",
+    link: "https://github.com/aaditkedia"
+  },
+  {
     title: "NeuroLex",
     tags: ["Java", "Python", "SQLite"],
     problem: "Cognitive accessibility issues, such as visual crowding and phonological decoding challenges, often hinder user interaction with digital content.",

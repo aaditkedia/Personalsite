@@ -3,6 +3,12 @@ import './Experience.css';
 
 const experienceData = [
   {
+    title: "AI Software Engineer & Full Stack Student",
+    organization: "Purdue University",
+    period: "2024 - Present",
+    description: "Specializing in software development, algorithmic design, and cognitive accessibility research. Key Coursework: Object-Oriented Programming (CS 176), Cognitive Psychology (PSY 200)."
+  },
+  {
     title: "Co-Founder & Chairman",
     organization: "Community United Eco-Cleanup Foundation (CUECF)",
     period: "2023 - Present",
@@ -13,12 +19,6 @@ const experienceData = [
     organization: "Boy Scouts of America",
     period: "Achieved 2023",
     description: "Successfully managed and completed an extensive service project, demonstrating leadership, discipline, and commitment to community service."
-  },
-  {
-    title: "AI Software Engineer & Full Stack Student",
-    organization: "Purdue University",
-    period: "2024 - Present",
-    description: "Specializing in software development, algorithmic design, and cognitive accessibility research with a focus on AI-driven solutions."
   }
 ];
 

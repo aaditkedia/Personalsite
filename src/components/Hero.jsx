@@ -1,10 +1,12 @@
 import React from 'react';
 import './Hero.css';
 import heroImage from '../assets/hero.png';
+import Background3D from './Background3D';
 
 const Hero = () => {
   return (
     <section id="home" className="hero">
+      <Background3D />
       <div className="container hero-container">
         <div className="hero-content">
           <span className="hero-tagline">Eagle Scout & Purdue University Student</span>

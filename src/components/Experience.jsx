@@ -3,22 +3,28 @@ import './Experience.css';
 
 const experienceData = [
   {
-    title: "AI Software Engineer & Full Stack Student",
-    organization: "Purdue University",
-    period: "2024 - Present",
-    description: "Specializing in software development, algorithmic design, and cognitive accessibility research. Key Coursework: Object-Oriented Programming (CS 176), Cognitive Psychology (PSY 200)."
+    title: "B.S. in Artificial Intelligence & Computer Science (Planned)",
+    organization: "Purdue University — West Lafayette, IN",
+    period: "Aug 2025 — May 2029",
+    description: "Pursuing a dual major in AI and CS. Coursework spans systems, algorithms, and applied ML; outside class, building research-grade tooling on top of LangGraph, Neo4j, and modern frontend stacks."
   },
   {
-    title: "Co-Founder & Chairman",
-    organization: "Community United Eco-Cleanup Foundation (CUECF)",
-    period: "2023 - Present",
-    description: "Leading a non-profit organization dedicated to environmental sustainability through community-driven cleanup initiatives and service projects."
+    title: "Founder & Chairman",
+    organization: "CUECF, LLC — Allentown, PA",
+    period: "Jun 2023 — Present",
+    description: "Built and deployed a full-stack web platform managing volunteer sign-ups, project listings, and donor communications. Organized 7+ restoration projects (1,500+ volunteer hours), secured $1,600+ in fundraising, and led 20+ volunteers across concurrent initiatives."
+  },
+  {
+    title: "Social Media Manager (Internship)",
+    organization: "Parkland High School — Allentown, PA",
+    period: "Sep 2022 — May 2023",
+    description: "Managed official district social media accounts; produced photo and video content that grew reach across the student and parent community."
   },
   {
     title: "Eagle Scout",
     organization: "Boy Scouts of America",
     period: "Achieved 2023",
-    description: "Successfully managed and completed an extensive service project, demonstrating leadership, discipline, and commitment to community service."
+    description: "Planned and executed an extensive service project — a working exercise in scope, leadership, and seeing a long-running commitment to completion."
   }
 ];
 

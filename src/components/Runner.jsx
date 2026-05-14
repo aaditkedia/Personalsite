@@ -80,9 +80,18 @@ function FBXBody({ characterUrl }) {
 
   const clips = useMemo(() => {
     const out = [];
+    // Pick the LONGEST clip from each source file. Some Mixamo exports
+    // include a T-pose or bind pose at index 0 and the real motion at
+    // index 1 — taking [0] blindly would label a static pose as 'run'
+    // and the scheduler would then mix flourishes into a T-pose, which
+    // is exactly the flailing pattern users see.
     const add = (src, name) => {
       if (!src || src.length === 0) return;
-      const c = src[0].clone();
+      let best = src[0];
+      for (let i = 1; i < src.length; i++) {
+        if (src[i].duration > best.duration) best = src[i];
+      }
+      const c = best.clone();
       c.name = name;
       out.push(c);
     };
@@ -118,9 +127,29 @@ function FBXBody({ characterUrl }) {
   }, [character]);
 
   useEffect(() => {
+    // Surface what was actually loaded — invaluable for debugging.
+    // eslint-disable-next-line no-console
+    console.log(
+      '[Runner] clips loaded:',
+      clips.map((c) => `${c.name} (${c.duration.toFixed(2)}s, ${c.tracks.length} tracks)`)
+    );
+
+    // Defensive nuke: kill every action that might be lingering before we
+    // explicitly activate run. Without this, if a clip somehow ends up in
+    // a half-active state the mixer blends ALL of them onto the rig and the
+    // character "has a seizure" — exactly the flailing pattern reported.
+    Object.values(actions).forEach((a) => {
+      if (!a) return;
+      a.stop();
+      a.enabled = false;
+      a.setEffectiveWeight(0);
+    });
+
     const run = actions['run'];
     if (!run) return;
+    run.enabled = true;
     run.setLoop(THREE.LoopRepeat, Infinity);
+    run.setEffectiveWeight(1.0);
     run.reset().fadeIn(0.4).play();
     // ~0.7x makes a single Mixamo run cycle read as ~1.4s of motion
     // instead of ~1s — much more cinematic, less treadmill-stutter.
@@ -138,10 +167,19 @@ function FBXBody({ characterUrl }) {
       const next = actions[name];
       const cur = actions['run'];
       if (!next || !cur) return;
+      // Belt-and-braces: silence every OTHER variant before activating
+      // this one, so we never have two flourishes overlapping.
+      variantKeys.forEach((k) => {
+        if (k !== name && actions[k]) {
+          actions[k].stop();
+          actions[k].enabled = false;
+          actions[k].setEffectiveWeight(0);
+        }
+      });
+      next.enabled = true;
       next.reset();
       next.setLoop(THREE.LoopOnce, 1);
-      next.clampWhenFinished = false;
-      next.enabled = true;
+      next.clampWhenFinished = true;
       next.setEffectiveTimeScale(name === 'lookback' ? 0.9 : 1.0);
       next.setEffectiveWeight(1.0);
       next.crossFadeFrom(cur, 0.25, false);
@@ -166,11 +204,19 @@ function FBXBody({ characterUrl }) {
       if (e.action === currentOneShot) {
         const r = actions['run'];
         if (r) {
+          r.enabled = true;
           r.reset();
           r.setEffectiveWeight(1.0);
           r.crossFadeFrom(e.action, 0.25, false);
           r.play();
         }
+        // Fully kill the just-finished variant after the crossfade.
+        const dead = e.action;
+        setTimeout(() => {
+          dead.stop();
+          dead.enabled = false;
+          dead.setEffectiveWeight(0);
+        }, 350);
         currentOneShot = null;
       }
     };

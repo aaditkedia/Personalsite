@@ -120,8 +120,11 @@ function FBXBody({ characterUrl }) {
   useEffect(() => {
     const run = actions['run'];
     if (!run) return;
+    run.setLoop(THREE.LoopRepeat, Infinity);
     run.reset().fadeIn(0.4).play();
-    run.setEffectiveTimeScale(1.05);
+    // ~0.7x makes a single Mixamo run cycle read as ~1.4s of motion
+    // instead of ~1s — much more cinematic, less treadmill-stutter.
+    run.setEffectiveTimeScale(0.7);
 
     const variantKeys = ['slide', 'dive', 'lookback', 'rightturn'].filter(
       (k) => !!actions[k]
@@ -148,7 +151,9 @@ function FBXBody({ characterUrl }) {
 
     const scheduleNext = () => {
       if (!alive) return;
-      const delay = 6000 + Math.random() * 5000;
+      // 18–28s between flourishes — long enough for the run loop to feel
+      // like a continuous shot, not a constantly-interrupted sketch.
+      const delay = 18000 + Math.random() * 10000;
       pendingTimeout = setTimeout(() => {
         if (!alive) return;
         const pick = variantKeys[Math.floor(Math.random() * variantKeys.length)];

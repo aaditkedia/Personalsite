@@ -90,10 +90,14 @@ const DroneScene = ({ hudRef, active = true }) => {
           mipmapBlur
           radius={0.7}
         />
+        {/* focusDistance is normalized 0-1 against the far plane (220).
+            Character sits ~10u from the camera ⇒ ~0.045 normalized.
+            focalLength widened so the focus zone reaches the rig without
+            killing background bokeh on the distant planets. */}
         <DepthOfField
-          focusDistance={0.012}
-          focalLength={0.05}
-          bokehScale={2.2}
+          focusDistance={0.045}
+          focalLength={0.12}
+          bokehScale={1.6}
           height={360}
         />
         <Vignette eskil={false} offset={0.2} darkness={0.85} />

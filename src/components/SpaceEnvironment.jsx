@@ -186,6 +186,30 @@ const Planets = () => {
 };
 
 /* --------------------------- Nebula backdrop ----------------------------- */
+/* Two layers:
+   - Sky sphere: inverted, encloses the camera so corners are never empty.
+     Camera is INSIDE this sphere, so the nebula always fills the FOV.
+   - Mid plane: closer parallax detail (subtle rotation).                  */
+
+const NebulaSky = () => {
+  const tex = useMemo(() => makeNebulaTexture(), []);
+  const ref = useRef();
+  useFrame((_, dt) => {
+    if (ref.current) ref.current.rotation.y += dt * 0.0025;
+  });
+  return (
+    <mesh ref={ref} renderOrder={-10}>
+      <sphereGeometry args={[200, 32, 32]} />
+      <meshBasicMaterial
+        map={tex}
+        side={THREE.BackSide}
+        depthWrite={false}
+        fog={false}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+};
 
 const NebulaBackdrop = () => {
   const tex = useMemo(() => makeNebulaTexture(), []);
@@ -194,9 +218,10 @@ const NebulaBackdrop = () => {
     if (ref.current) ref.current.rotation.z += dt * 0.0015;
   });
   return (
-    <mesh ref={ref} position={[0, 8, -130]} rotation={[0, 0, 0]}>
-      <planeGeometry args={[260, 160]} />
-      <meshBasicMaterial map={tex} transparent opacity={0.85} depthWrite={false} />
+    <mesh ref={ref} position={[0, 10, -120]}>
+      {/* Wide enough to fully cover a 75°-FOV camera at z=-8 → spans ~167u. */}
+      <planeGeometry args={[420, 260]} />
+      <meshBasicMaterial map={tex} transparent opacity={0.7} depthWrite={false} fog={false} />
     </mesh>
   );
 };
@@ -352,6 +377,10 @@ const CosmicDust = ({ count = 280 }) => {
 
 const SpaceEnvironment = () => (
   <>
+    {/* Deep-navy exponential fog blends distant geometry into the nebula
+        instead of clipping to pure black at the screen edges. */}
+    <fogExp2 attach="fog" args={['#080a1a', 0.0085]} />
+    <NebulaSky />
     <Stars radius={180} depth={100} count={4500} factor={3} saturation={0} fade speed={0.5} />
     <NebulaBackdrop />
     <Planets />

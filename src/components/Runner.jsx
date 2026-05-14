@@ -6,6 +6,7 @@ import * as THREE from 'three';
 // Vite serves the site under /Personalsite/ on Pages, / in dev.
 const ASSET = (file) => `${import.meta.env.BASE_URL}${file}`;
 
+const CHAR_URL      = ASSET('char.glb');
 const RUNNING_URL   = ASSET('running.glb');
 const SLIDE_URL     = ASSET('runtoslide.glb');
 const DIVE_URL      = ASSET('runtodive.glb');
@@ -13,8 +14,6 @@ const LOOKBACK_URL  = ASSET('lookback.glb');
 const RIGHTTURN_URL = ASSET('runningrightturn.glb');
 
 const Runner = React.forwardRef(function Runner(_, groupRef) {
-  // Organic side-to-side drift (two summed sines). Drives the chase
-  // camera's banking via DroneCamera's `lateralDelta` calculation.
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (!groupRef.current) return;
@@ -35,10 +34,9 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
 });
 
 function Rig() {
-  // running.glb is the base rig (matches the FBX flow which used
-  // Running.fbx — its skeleton is guaranteed to bind the run clip).
-  // The remaining action GLBs contribute their AnimationClips; Mixamo's
-  // `mixamorig:` bone names match across exports so they retarget cleanly.
+  // char.glb = skinned mesh + skeleton. The five action GLBs contribute
+  // only AnimationClips.
+  const charGLB  = useGLTF(CHAR_URL);
   const runGLB   = useGLTF(RUNNING_URL);
   const slideGLB = useGLTF(SLIDE_URL);
   const diveGLB  = useGLTF(DIVE_URL);
@@ -46,46 +44,95 @@ function Rig() {
   const turnGLB  = useGLTF(RIGHTTURN_URL);
 
   const ref = useRef();
+  const charScene = charGLB.scene;
 
-  // Pick the longest clip from each source — guards against T-pose
-  // clips that some Mixamo exports ship at index 0.
+  // FBX→GLB converters strip the ':' from Mixamo bone names on the skeleton
+  // (`mixamorigHips`) but leave animation tracks referencing the original
+  // (`mixamorig:Hips`). When that happens, useAnimations binds zero tracks
+  // and the rig stays in T-pose. Detect what naming the rig uses and
+  // rewrite clip track names to match.
+  const sceneNaming = useMemo(() => {
+    let colon = false, noColon = false;
+    charScene.traverse((n) => {
+      if (!n.name) return;
+      if (n.name.startsWith('mixamorig:')) colon = true;
+      else if (/^mixamorig[A-Z]/.test(n.name)) noColon = true;
+    });
+    return colon ? 'colon' : (noColon ? 'nocolon' : 'unknown');
+  }, [charScene]);
+
   const clips = useMemo(() => {
-    const pickLongest = (anims, name) => {
+    const pickLongest = (anims) => {
       if (!anims || anims.length === 0) return null;
       let best = anims[0];
       for (let i = 1; i < anims.length; i++) {
         if (anims[i].duration > best.duration) best = anims[i];
       }
-      const c = best.clone();
+      return best;
+    };
+
+    const adapt = (clip, name) => {
+      if (!clip) return null;
+      const c = clip.clone();
       c.name = name;
+      c.tracks = c.tracks.map((t) => {
+        const tt = t.clone();
+        if (sceneNaming === 'nocolon') {
+          tt.name = tt.name.replace('mixamorig:', 'mixamorig');
+        } else if (sceneNaming === 'colon') {
+          tt.name = tt.name.replace(/^mixamorig(?!:)/, 'mixamorig:');
+        }
+        return tt;
+      });
       return c;
     };
+
     return [
-      pickLongest(runGLB.animations,   'run'),
-      pickLongest(slideGLB.animations, 'slide'),
-      pickLongest(diveGLB.animations,  'dive'),
-      pickLongest(lookGLB.animations,  'lookback'),
-      pickLongest(turnGLB.animations,  'rightturn'),
+      adapt(pickLongest(runGLB.animations),   'run'),
+      adapt(pickLongest(slideGLB.animations), 'slide'),
+      adapt(pickLongest(diveGLB.animations),  'dive'),
+      adapt(pickLongest(lookGLB.animations),  'lookback'),
+      adapt(pickLongest(turnGLB.animations),  'rightturn'),
     ].filter(Boolean);
-  }, [runGLB, slideGLB, diveGLB, lookGLB, turnGLB]);
+  }, [runGLB, slideGLB, diveGLB, lookGLB, turnGLB, sceneNaming]);
 
   const { actions, mixer } = useAnimations(clips, ref);
 
-  // Shadow + culling pass on the character mesh.
+  // Auto-scale the rig to a known world height and drop its feet to Y=0.
+  // We can't trust a fixed scale constant: different Mixamo GLB export
+  // pipelines emit cm-unit (×180) and m-unit (×1.8) characters, and a
+  // wrong guess either hides the rig (too small) or swallows the camera
+  // (too big — exactly what we hit at scale=1).
   useEffect(() => {
-    runGLB.scene.traverse((child) => {
+    charScene.position.set(0, 0, 0);
+    charScene.scale.setScalar(1);
+    charScene.updateMatrixWorld(true);
+    charScene.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.frustumCulled = false;
+        if (child.geometry) {
+          child.geometry.computeBoundingBox();
+          child.geometry.computeBoundingSphere();
+        }
       }
     });
-  }, [runGLB]);
+
+    const box = new THREE.Box3().setFromObject(charScene);
+    const size = box.getSize(new THREE.Vector3());
+    const TARGET_HEIGHT = 2.4;
+    if (size.y > 0 && Number.isFinite(size.y)) {
+      const factor = TARGET_HEIGHT / size.y;
+      charScene.scale.setScalar(factor);
+      charScene.updateMatrixWorld(true);
+      const box2 = new THREE.Box3().setFromObject(charScene);
+      // Feet sit on the neon runway (y=0).
+      charScene.position.y = -box2.min.y;
+    }
+  }, [charScene]);
 
   // Deterministic sequence:
   //   dive → run → slide → run → rightturn → run → lookback → run → (loop)
-  // The run loop is the connector between every one-shot. When a one-shot
-  // finishes we crossfade back to run, hold for RUN_HOLD_MS, then play the
-  // next variant in the sequence.
   useEffect(() => {
     Object.values(actions).forEach((a) => {
       if (a) { a.stop(); a.enabled = false; a.setEffectiveWeight(0); }
@@ -113,11 +160,8 @@ function Rig() {
     const playOneShot = (name) => {
       const next = actions[name];
       if (!next) {
-        // Missing clip — skip and advance.
         idx = (idx + 1) % sequence.length;
-        pending = setTimeout(() => {
-          if (alive) playOneShot(sequence[idx]);
-        }, 0);
+        pending = setTimeout(() => { if (alive) playOneShot(sequence[idx]); }, 0);
         return;
       }
       next.enabled = true;
@@ -142,19 +186,12 @@ function Rig() {
       setTimeout(() => { finished.stop(); finished.enabled = false; }, 350);
       activeOneShot = null;
       idx = (idx + 1) % sequence.length;
-      pending = setTimeout(() => {
-        if (alive) playOneShot(sequence[idx]);
-      }, RUN_HOLD_MS);
+      pending = setTimeout(() => { if (alive) playOneShot(sequence[idx]); }, RUN_HOLD_MS);
     };
 
     mixer.addEventListener('finished', onFinished);
-
-    // Prime the rig with run, then immediately transition to dive — the
-    // brief run state gives crossFadeFrom a hot action to blend out of.
     startRunLoop();
-    pending = setTimeout(() => {
-      if (alive) playOneShot(sequence[idx]);
-    }, 60);
+    pending = setTimeout(() => { if (alive) playOneShot(sequence[idx]); }, 60);
 
     return () => {
       alive = false;
@@ -163,12 +200,10 @@ function Rig() {
     };
   }, [actions, mixer]);
 
-  // Mixamo's GLB exports inherit FBX-style cm units — 0.013 matches the
-  // sizing the chase camera was tuned against. scale=1 puts the camera
-  // inside the chest cavity (invisible character).
-  return <primitive ref={ref} object={runGLB.scene} scale={0.013} />;
+  return <primitive ref={ref} object={charScene} />;
 }
 
+useGLTF.preload(CHAR_URL);
 useGLTF.preload(RUNNING_URL);
 useGLTF.preload(SLIDE_URL);
 useGLTF.preload(DIVE_URL);

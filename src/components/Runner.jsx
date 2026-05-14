@@ -3,40 +3,18 @@ import { useFrame } from '@react-three/fiber';
 import { useFBX, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 
-/**
- * Runner.
- *
- * Visual rig priority:
- *   1. `/character.fbx`  — preferred if present + loadable.
- *   2. `/Running.fbx`    — fallback. Ships a Mixamo character mesh and
- *                          works regardless of what character.fbx is.
- *
- * Why the fallback: Three's FBXLoader only accepts FBX 7.0+ binary files.
- * If `character.fbx` is an older format (FBX 6100, etc.) the load throws
- * and the ErrorBoundary swaps to the Running-based rig so the scene
- * always has a real humanoid runner — never the procedural placeholder.
- *
- * Animations: the five Running/Run/Slide/Dive/LookBack/RightTurn clips
- * retarget onto whichever rig wins (Mixamo bone names match across all
- * files), driven through a single useAnimations mixer.
- *
- * All URLs go through `import.meta.env.BASE_URL` so they resolve under
- * the GitHub Pages sub-path (/Personalsite/) in production.
- */
+// Vite serves the site under /Personalsite/ on Pages, / in dev.
 const ASSET = (file) => `${import.meta.env.BASE_URL}${file}`;
 
-const CHARACTER_URL = ASSET('character.fbx');
 const RUNNING_URL   = ASSET('Running.fbx');
-
-const ANIMATION_SOURCES = [
-  { key: 'run',       url: RUNNING_URL },
-  { key: 'slide',     url: ASSET('Running%20Slide.fbx') },
-  { key: 'dive',      url: ASSET('Run%20To%20Dive.fbx') },
-  { key: 'lookback',  url: ASSET('Run%20Look%20Back.fbx') },
-  { key: 'rightturn', url: ASSET('Running%20Right%20Turn.fbx') },
-];
+const SLIDE_URL     = ASSET('Running%20Slide.fbx');
+const DIVE_URL      = ASSET('Run%20To%20Dive.fbx');
+const LOOKBACK_URL  = ASSET('Run%20Look%20Back.fbx');
+const RIGHTTURN_URL = ASSET('Running%20Right%20Turn.fbx');
 
 const Runner = React.forwardRef(function Runner(_, groupRef) {
+  // Organic side-to-side drift (two summed sines). Drives the chase
+  // camera's banking via DroneCamera's `lateralDelta` calculation.
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (!groupRef.current) return;
@@ -47,281 +25,138 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
     groupRef.current.rotation.y = Math.atan2(driftDx, 8) * 0.8;
   });
 
-  const fallback = (
-    <Suspense fallback={<PlaceholderBody />}>
-      <FBXBody characterUrl={RUNNING_URL} />
-    </Suspense>
-  );
-
   return (
-    <group ref={groupRef} position={[0, 0, 0]} rotation={[0, Math.PI, 0]}>
-      <FBXErrorBoundary fallback={fallback}>
-        <Suspense fallback={<PlaceholderBody />}>
-          <FBXBody characterUrl={CHARACTER_URL} />
-        </Suspense>
-      </FBXErrorBoundary>
+    <group ref={groupRef}>
+      <Suspense fallback={null}>
+        <Rig />
+      </Suspense>
     </group>
   );
 });
 
-function FBXBody({ characterUrl }) {
-  const character = useFBX(characterUrl);
+function Rig() {
+  // Running.fbx ships a usable Mixamo character mesh AND the run clip.
+  // The four variant files contribute only their AnimationClips.
+  const base       = useFBX(RUNNING_URL);
+  const slideFBX   = useFBX(SLIDE_URL);
+  const diveFBX    = useFBX(DIVE_URL);
+  const lookFBX    = useFBX(LOOKBACK_URL);
+  const turnFBX    = useFBX(RIGHTTURN_URL);
 
-  // Load each clip source. When characterUrl IS Running.fbx (the fallback
-  // path), useFBX returns the *same cached scene* for both — that's fine,
-  // we still clone the AnimationClips before binding them to the mixer.
-  const runFBX       = useFBX(ANIMATION_SOURCES[0].url);
-  const slideFBX     = useFBX(ANIMATION_SOURCES[1].url);
-  const diveFBX      = useFBX(ANIMATION_SOURCES[2].url);
-  const lookbackFBX  = useFBX(ANIMATION_SOURCES[3].url);
-  const rightturnFBX = useFBX(ANIMATION_SOURCES[4].url);
+  const ref = useRef();
 
-  const innerRef = useRef();
-
+  // Pick the longest clip from each source — guards against T-pose
+  // clips that some Mixamo exports ship at index 0.
   const clips = useMemo(() => {
-    const out = [];
-    // Pick the LONGEST clip from each source file. Some Mixamo exports
-    // include a T-pose or bind pose at index 0 and the real motion at
-    // index 1 — taking [0] blindly would label a static pose as 'run'
-    // and the scheduler would then mix flourishes into a T-pose, which
-    // is exactly the flailing pattern users see.
-    const add = (src, name) => {
-      if (!src || src.length === 0) return;
-      let best = src[0];
-      for (let i = 1; i < src.length; i++) {
-        if (src[i].duration > best.duration) best = src[i];
+    const pickLongest = (anims, name) => {
+      if (!anims || anims.length === 0) return null;
+      let best = anims[0];
+      for (let i = 1; i < anims.length; i++) {
+        if (anims[i].duration > best.duration) best = anims[i];
       }
       const c = best.clone();
       c.name = name;
-      out.push(c);
+      return c;
     };
-    add(runFBX.animations,       'run');
-    add(slideFBX.animations,     'slide');
-    add(diveFBX.animations,      'dive');
-    add(lookbackFBX.animations,  'lookback');
-    add(rightturnFBX.animations, 'rightturn');
-    return out;
-  }, [runFBX, slideFBX, diveFBX, lookbackFBX, rightturnFBX]);
+    return [
+      pickLongest(base.animations,     'run'),
+      pickLongest(slideFBX.animations, 'slide'),
+      pickLongest(diveFBX.animations,  'dive'),
+      pickLongest(lookFBX.animations,  'lookback'),
+      pickLongest(turnFBX.animations,  'rightturn'),
+    ].filter(Boolean);
+  }, [base, slideFBX, diveFBX, lookFBX, turnFBX]);
 
-  const { actions, mixer } = useAnimations(clips, innerRef);
+  const { actions, mixer } = useAnimations(clips, ref);
 
+  // Shadow + culling pass.
   useEffect(() => {
-    character.traverse((child) => {
+    base.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
-        child.receiveShadow = false;
         child.frustumCulled = false;
-        const m = child.material;
-        if (m && m.isMeshStandardMaterial) {
-          m.roughness = 0.7;
-          m.metalness = 0.15;
-          m.envMapIntensity = 1.0;
-          m.needsUpdate = true;
-        } else if (m && m.isMeshPhongMaterial) {
-          m.shininess = 30;
-          m.specular = new THREE.Color('#222a3a');
-          m.needsUpdate = true;
-        }
       }
     });
-  }, [character]);
+  }, [base]);
 
+  // Drive the run loop; schedule random one-shot variants every 18–28s.
   useEffect(() => {
-    // Surface what was actually loaded — invaluable for debugging.
-    // eslint-disable-next-line no-console
-    console.log(
-      '[Runner] clips loaded:',
-      clips.map((c) => `${c.name} (${c.duration.toFixed(2)}s, ${c.tracks.length} tracks)`)
-    );
-
-    // Defensive nuke: kill every action that might be lingering before we
-    // explicitly activate run. Without this, if a clip somehow ends up in
-    // a half-active state the mixer blends ALL of them onto the rig and the
-    // character "has a seizure" — exactly the flailing pattern reported.
+    // Defensive: silence every action before activating run. The mixer
+    // can't blend a stale clip onto the rig if no other action is hot.
     Object.values(actions).forEach((a) => {
-      if (!a) return;
-      a.stop();
-      a.enabled = false;
-      a.setEffectiveWeight(0);
+      if (a) { a.stop(); a.enabled = false; a.setEffectiveWeight(0); }
     });
 
     const run = actions['run'];
     if (!run) return;
     run.enabled = true;
     run.setLoop(THREE.LoopRepeat, Infinity);
-    run.setEffectiveWeight(1.0);
-    run.reset().fadeIn(0.4).play();
-    // ~0.7x makes a single Mixamo run cycle read as ~1.4s of motion
-    // instead of ~1s — much more cinematic, less treadmill-stutter.
+    run.setEffectiveWeight(1);
     run.setEffectiveTimeScale(0.7);
+    run.reset().fadeIn(0.4).play();
 
-    const variantKeys = ['slide', 'dive', 'lookback', 'rightturn'].filter(
-      (k) => !!actions[k]
-    );
-
+    const variants = ['slide', 'dive', 'lookback', 'rightturn'].filter((k) => actions[k]);
     let alive = true;
-    let pendingTimeout;
-    let currentOneShot = null;
+    let pending;
+    let oneShot = null;
 
     const playVariant = (name) => {
       const next = actions[name];
-      const cur = actions['run'];
-      if (!next || !cur) return;
-      // Belt-and-braces: silence every OTHER variant before activating
-      // this one, so we never have two flourishes overlapping.
-      variantKeys.forEach((k) => {
+      if (!next) return;
+      variants.forEach((k) => {
         if (k !== name && actions[k]) {
-          actions[k].stop();
-          actions[k].enabled = false;
-          actions[k].setEffectiveWeight(0);
+          actions[k].stop(); actions[k].enabled = false;
         }
       });
       next.enabled = true;
       next.reset();
       next.setLoop(THREE.LoopOnce, 1);
       next.clampWhenFinished = true;
-      next.setEffectiveTimeScale(name === 'lookback' ? 0.9 : 1.0);
-      next.setEffectiveWeight(1.0);
-      next.crossFadeFrom(cur, 0.25, false);
+      next.setEffectiveWeight(1);
+      next.setEffectiveTimeScale(name === 'lookback' ? 0.9 : 1);
+      next.crossFadeFrom(run, 0.25, false);
       next.play();
-      currentOneShot = next;
+      oneShot = next;
     };
 
-    const scheduleNext = () => {
+    const schedule = () => {
       if (!alive) return;
-      // 18–28s between flourishes — long enough for the run loop to feel
-      // like a continuous shot, not a constantly-interrupted sketch.
-      const delay = 18000 + Math.random() * 10000;
-      pendingTimeout = setTimeout(() => {
+      pending = setTimeout(() => {
         if (!alive) return;
-        const pick = variantKeys[Math.floor(Math.random() * variantKeys.length)];
-        if (pick) playVariant(pick);
-        scheduleNext();
-      }, delay);
+        playVariant(variants[Math.floor(Math.random() * variants.length)]);
+        schedule();
+      }, 18000 + Math.random() * 10000);
     };
 
     const onFinished = (e) => {
-      if (e.action === currentOneShot) {
-        const r = actions['run'];
-        if (r) {
-          r.enabled = true;
-          r.reset();
-          r.setEffectiveWeight(1.0);
-          r.crossFadeFrom(e.action, 0.25, false);
-          r.play();
-        }
-        // Fully kill the just-finished variant after the crossfade.
-        const dead = e.action;
-        setTimeout(() => {
-          dead.stop();
-          dead.enabled = false;
-          dead.setEffectiveWeight(0);
-        }, 350);
-        currentOneShot = null;
-      }
+      if (e.action !== oneShot) return;
+      run.enabled = true;
+      run.reset();
+      run.setEffectiveWeight(1);
+      run.crossFadeFrom(e.action, 0.25, false);
+      run.play();
+      const dead = e.action;
+      setTimeout(() => { dead.stop(); dead.enabled = false; }, 350);
+      oneShot = null;
     };
 
     mixer.addEventListener('finished', onFinished);
-    scheduleNext();
+    schedule();
 
     return () => {
       alive = false;
-      if (pendingTimeout) clearTimeout(pendingTimeout);
+      if (pending) clearTimeout(pending);
       mixer.removeEventListener('finished', onFinished);
     };
   }, [actions, mixer]);
 
-  return (
-    <primitive
-      ref={innerRef}
-      object={character}
-      scale={0.013}
-      position={[0, 0, 0]}
-    />
-  );
+  return <primitive ref={ref} object={base} scale={0.013} />;
 }
 
-class FBXErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { errored: false };
-  }
-  static getDerivedStateFromError() {
-    return { errored: true };
-  }
-  componentDidCatch(err) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      '[Runner] character.fbx unloadable — falling back to Running.fbx rig.',
-      err?.message || err
-    );
-  }
-  render() {
-    if (this.state.errored) return this.props.fallback;
-    return this.props.children;
-  }
-}
-
-function PlaceholderBody() {
-  const torso = useRef();
-  const lLeg = useRef();
-  const rLeg = useRef();
-  const lArm = useRef();
-  const rArm = useRef();
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    const stride = t * 6;
-    if (torso.current) torso.current.position.y = 1.0 + Math.abs(Math.sin(stride)) * 0.12;
-    const sw = Math.sin(stride);
-    if (lLeg.current) lLeg.current.rotation.x = sw * 0.9;
-    if (rLeg.current) rLeg.current.rotation.x = -sw * 0.9;
-    if (lArm.current) lArm.current.rotation.x = -sw * 0.7;
-    if (rArm.current) rArm.current.rotation.x = sw * 0.7;
-  });
-
-  return (
-    <group ref={torso} position={[0, 1, 0]}>
-      <mesh castShadow>
-        <capsuleGeometry args={[0.22, 0.5, 6, 12]} />
-        <meshStandardMaterial color="#c9d6ff" roughness={0.4} metalness={0.2} />
-      </mesh>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <sphereGeometry args={[0.17, 16, 16]} />
-        <meshStandardMaterial color="#f3e6c2" roughness={0.6} />
-      </mesh>
-      <group ref={lArm} position={[-0.28, 0.25, 0]}>
-        <mesh position={[0, -0.3, 0]} castShadow>
-          <capsuleGeometry args={[0.07, 0.45, 4, 8]} />
-          <meshStandardMaterial color="#c9d6ff" roughness={0.5} />
-        </mesh>
-      </group>
-      <group ref={rArm} position={[0.28, 0.25, 0]}>
-        <mesh position={[0, -0.3, 0]} castShadow>
-          <capsuleGeometry args={[0.07, 0.45, 4, 8]} />
-          <meshStandardMaterial color="#c9d6ff" roughness={0.5} />
-        </mesh>
-      </group>
-      <group ref={lLeg} position={[-0.12, -0.3, 0]}>
-        <mesh position={[0, -0.4, 0]} castShadow>
-          <capsuleGeometry args={[0.09, 0.55, 4, 8]} />
-          <meshStandardMaterial color="#1f2937" roughness={0.7} />
-        </mesh>
-      </group>
-      <group ref={rLeg} position={[0.12, -0.3, 0]}>
-        <mesh position={[0, -0.4, 0]} castShadow>
-          <capsuleGeometry args={[0.09, 0.55, 4, 8]} />
-          <meshStandardMaterial color="#1f2937" roughness={0.7} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-try {
-  useFBX.preload(CHARACTER_URL);
-  useFBX.preload(RUNNING_URL);
-  ANIMATION_SOURCES.forEach((s) => useFBX.preload(s.url));
-} catch (_) { /* noop */ }
+useFBX.preload(RUNNING_URL);
+useFBX.preload(SLIDE_URL);
+useFBX.preload(DIVE_URL);
+useFBX.preload(LOOKBACK_URL);
+useFBX.preload(RIGHTTURN_URL);
 
 export default Runner;

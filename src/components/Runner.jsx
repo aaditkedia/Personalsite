@@ -6,25 +6,35 @@ import * as THREE from 'three';
 /**
  * Runner.
  *
- * - `/character.fbx`  → visual rig (skinned mesh + skeleton).
- * - `/Running.fbx` plus the four variants → animation sources only;
- *   their AnimationClips retarget onto the character's skeleton via
- *   useAnimations (Mixamo bone names match across files).
+ * Visual rig priority:
+ *   1. `/character.fbx`  — preferred if present + loadable.
+ *   2. `/Running.fbx`    — fallback. Ships a Mixamo character mesh and
+ *                          works regardless of what character.fbx is.
  *
- * Asset URLs are prefixed with `import.meta.env.BASE_URL` so they resolve
- * correctly when the site is hosted under a sub-path like /Personalsite/
- * (GitHub Pages). In dev BASE_URL is "/", in prod it's "/Personalsite/".
+ * Why the fallback: Three's FBXLoader only accepts FBX 7.0+ binary files.
+ * If `character.fbx` is an older format (FBX 6100, etc.) the load throws
+ * and the ErrorBoundary swaps to the Running-based rig so the scene
+ * always has a real humanoid runner — never the procedural placeholder.
+ *
+ * Animations: the five Running/Run/Slide/Dive/LookBack/RightTurn clips
+ * retarget onto whichever rig wins (Mixamo bone names match across all
+ * files), driven through a single useAnimations mixer.
+ *
+ * All URLs go through `import.meta.env.BASE_URL` so they resolve under
+ * the GitHub Pages sub-path (/Personalsite/) in production.
  */
 const ASSET = (file) => `${import.meta.env.BASE_URL}${file}`;
 
+const CHARACTER_URL = ASSET('character.fbx');
+const RUNNING_URL   = ASSET('Running.fbx');
+
 const ANIMATION_SOURCES = [
-  { key: 'run',       url: ASSET('Running.fbx') },
+  { key: 'run',       url: RUNNING_URL },
   { key: 'slide',     url: ASSET('Running%20Slide.fbx') },
   { key: 'dive',      url: ASSET('Run%20To%20Dive.fbx') },
   { key: 'lookback',  url: ASSET('Run%20Look%20Back.fbx') },
   { key: 'rightturn', url: ASSET('Running%20Right%20Turn.fbx') },
 ];
-const CHARACTER_URL = ASSET('character.fbx');
 
 const Runner = React.forwardRef(function Runner(_, groupRef) {
   useFrame((state) => {
@@ -32,26 +42,34 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
     if (!groupRef.current) return;
     groupRef.current.position.x =
       Math.sin(t * 0.6) * 1.4 + Math.sin(t * 1.7) * 0.4;
-
     const driftDx =
       Math.cos(t * 0.6) * 0.6 * 1.4 + Math.cos(t * 1.7) * 1.7 * 0.4;
     groupRef.current.rotation.y = Math.atan2(driftDx, 8) * 0.8;
   });
 
+  const fallback = (
+    <Suspense fallback={<PlaceholderBody />}>
+      <FBXBody characterUrl={RUNNING_URL} />
+    </Suspense>
+  );
+
   return (
     <group ref={groupRef} position={[0, 0, 0]} rotation={[0, Math.PI, 0]}>
-      <FBXErrorBoundary fallback={<PlaceholderBody />}>
+      <FBXErrorBoundary fallback={fallback}>
         <Suspense fallback={<PlaceholderBody />}>
-          <FBXBody />
+          <FBXBody characterUrl={CHARACTER_URL} />
         </Suspense>
       </FBXErrorBoundary>
     </group>
   );
 });
 
-function FBXBody() {
-  const character = useFBX(CHARACTER_URL);
+function FBXBody({ characterUrl }) {
+  const character = useFBX(characterUrl);
 
+  // Load each clip source. When characterUrl IS Running.fbx (the fallback
+  // path), useFBX returns the *same cached scene* for both — that's fine,
+  // we still clone the AnimationClips before binding them to the mixer.
   const runFBX       = useFBX(ANIMATION_SOURCES[0].url);
   const slideFBX     = useFBX(ANIMATION_SOURCES[1].url);
   const diveFBX      = useFBX(ANIMATION_SOURCES[2].url);
@@ -78,11 +96,6 @@ function FBXBody() {
 
   const { actions, mixer } = useAnimations(clips, innerRef);
 
-  // Enable shadows + fix culling on the character's meshes. Don't replace
-  // the materials — Mixamo's default Phong materials compile reliably; the
-  // previous Phong→Standard upgrade was the source of the shader-compile
-  // error in production. Just nudge a few properties in-place if the
-  // material happens to be Standard already.
   useEffect(() => {
     character.traverse((child) => {
       if (child.isMesh) {
@@ -187,7 +200,10 @@ class FBXErrorBoundary extends React.Component {
   }
   componentDidCatch(err) {
     // eslint-disable-next-line no-console
-    console.warn('[Runner] FBX failed to load — using placeholder:', err?.message || err);
+    console.warn(
+      '[Runner] character.fbx unloadable — falling back to Running.fbx rig.',
+      err?.message || err
+    );
   }
   render() {
     if (this.state.errored) return this.props.fallback;
@@ -253,6 +269,7 @@ function PlaceholderBody() {
 
 try {
   useFBX.preload(CHARACTER_URL);
+  useFBX.preload(RUNNING_URL);
   ANIMATION_SOURCES.forEach((s) => useFBX.preload(s.url));
 } catch (_) { /* noop */ }
 

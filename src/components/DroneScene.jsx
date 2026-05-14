@@ -23,7 +23,10 @@ const DroneScene = ({ hudRef, active = true }) => {
 
   return (
     <Canvas
-      shadows
+      // "percentage" uses PCFShadowMap — Three deprecates PCFSoftShadowMap
+      // (which is what plain `shadows` would set) and spams the console
+      // every frame with the warning.
+      shadows="percentage"
       // Cap DPR at 1.5. On retina displays the visual difference vs 2.0 is
       // imperceptible for this kind of moody / bloomy scene but the GPU cost
       // is ~1.8x lower per frame.

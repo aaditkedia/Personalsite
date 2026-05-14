@@ -1,16 +1,17 @@
 import React, { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useFBX, useAnimations } from '@react-three/drei';
+import { useGLTF, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Vite serves the site under /Personalsite/ on Pages, / in dev.
 const ASSET = (file) => `${import.meta.env.BASE_URL}${file}`;
 
-const RUNNING_URL   = ASSET('Running.fbx');
-const SLIDE_URL     = ASSET('Running%20Slide.fbx');
-const DIVE_URL      = ASSET('Run%20To%20Dive.fbx');
-const LOOKBACK_URL  = ASSET('Run%20Look%20Back.fbx');
-const RIGHTTURN_URL = ASSET('Running%20Right%20Turn.fbx');
+const CHAR_URL      = ASSET('char.glb');
+const RUNNING_URL   = ASSET('running.glb');
+const SLIDE_URL     = ASSET('runtoslide.glb');
+const DIVE_URL      = ASSET('runtodive.glb');
+const LOOKBACK_URL  = ASSET('lookback.glb');
+const RIGHTTURN_URL = ASSET('runningrightturn.glb');
 
 const Runner = React.forwardRef(function Runner(_, groupRef) {
   // Organic side-to-side drift (two summed sines). Drives the chase
@@ -35,13 +36,15 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
 });
 
 function Rig() {
-  // Running.fbx ships a usable Mixamo character mesh AND the run clip.
-  // The four variant files contribute only their AnimationClips.
-  const base       = useFBX(RUNNING_URL);
-  const slideFBX   = useFBX(SLIDE_URL);
-  const diveFBX    = useFBX(DIVE_URL);
-  const lookFBX    = useFBX(LOOKBACK_URL);
-  const turnFBX    = useFBX(RIGHTTURN_URL);
+  // char.glb supplies the skinned mesh + skeleton. The five action GLBs
+  // contribute only their AnimationClips — Mixamo's bone names match
+  // across exports so the clips bind onto char's rig cleanly.
+  const char     = useGLTF(CHAR_URL);
+  const runGLB   = useGLTF(RUNNING_URL);
+  const slideGLB = useGLTF(SLIDE_URL);
+  const diveGLB  = useGLTF(DIVE_URL);
+  const lookGLB  = useGLTF(LOOKBACK_URL);
+  const turnGLB  = useGLTF(RIGHTTURN_URL);
 
   const ref = useRef();
 
@@ -59,55 +62,65 @@ function Rig() {
       return c;
     };
     return [
-      pickLongest(base.animations,     'run'),
-      pickLongest(slideFBX.animations, 'slide'),
-      pickLongest(diveFBX.animations,  'dive'),
-      pickLongest(lookFBX.animations,  'lookback'),
-      pickLongest(turnFBX.animations,  'rightturn'),
+      pickLongest(runGLB.animations,   'run'),
+      pickLongest(slideGLB.animations, 'slide'),
+      pickLongest(diveGLB.animations,  'dive'),
+      pickLongest(lookGLB.animations,  'lookback'),
+      pickLongest(turnGLB.animations,  'rightturn'),
     ].filter(Boolean);
-  }, [base, slideFBX, diveFBX, lookFBX, turnFBX]);
+  }, [runGLB, slideGLB, diveGLB, lookGLB, turnGLB]);
 
   const { actions, mixer } = useAnimations(clips, ref);
 
-  // Shadow + culling pass.
+  // Shadow + culling pass on the character mesh.
   useEffect(() => {
-    base.traverse((child) => {
+    char.scene.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.frustumCulled = false;
       }
     });
-  }, [base]);
+  }, [char]);
 
-  // Drive the run loop; schedule random one-shot variants every 18–28s.
+  // Deterministic sequence:
+  //   dive → run → slide → run → rightturn → run → lookback → run → (loop)
+  // The run loop is the connector between every one-shot. When a one-shot
+  // finishes we crossfade back to run, hold for RUN_HOLD_MS, then play the
+  // next variant in the sequence.
   useEffect(() => {
-    // Defensive: silence every action before activating run. The mixer
-    // can't blend a stale clip onto the rig if no other action is hot.
     Object.values(actions).forEach((a) => {
       if (a) { a.stop(); a.enabled = false; a.setEffectiveWeight(0); }
     });
 
     const run = actions['run'];
     if (!run) return;
-    run.enabled = true;
-    run.setLoop(THREE.LoopRepeat, Infinity);
-    run.setEffectiveWeight(1);
-    run.setEffectiveTimeScale(0.7);
-    run.reset().fadeIn(0.4).play();
 
-    const variants = ['slide', 'dive', 'lookback', 'rightturn'].filter((k) => actions[k]);
+    const sequence = ['dive', 'slide', 'rightturn', 'lookback'];
+    const RUN_HOLD_MS = 4200;
+
     let alive = true;
-    let pending;
-    let oneShot = null;
+    let pending = null;
+    let idx = 0;
+    let activeOneShot = null;
 
-    const playVariant = (name) => {
+    const startRunLoop = () => {
+      run.enabled = true;
+      run.setLoop(THREE.LoopRepeat, Infinity);
+      run.setEffectiveWeight(1);
+      run.setEffectiveTimeScale(0.9);
+      run.play();
+    };
+
+    const playOneShot = (name) => {
       const next = actions[name];
-      if (!next) return;
-      variants.forEach((k) => {
-        if (k !== name && actions[k]) {
-          actions[k].stop(); actions[k].enabled = false;
-        }
-      });
+      if (!next) {
+        // Missing clip — skip and advance.
+        idx = (idx + 1) % sequence.length;
+        pending = setTimeout(() => {
+          if (alive) playOneShot(sequence[idx]);
+        }, 0);
+        return;
+      }
       next.enabled = true;
       next.reset();
       next.setLoop(THREE.LoopOnce, 1);
@@ -116,32 +129,33 @@ function Rig() {
       next.setEffectiveTimeScale(name === 'lookback' ? 0.9 : 1);
       next.crossFadeFrom(run, 0.25, false);
       next.play();
-      oneShot = next;
-    };
-
-    const schedule = () => {
-      if (!alive) return;
-      pending = setTimeout(() => {
-        if (!alive) return;
-        playVariant(variants[Math.floor(Math.random() * variants.length)]);
-        schedule();
-      }, 18000 + Math.random() * 10000);
+      activeOneShot = next;
     };
 
     const onFinished = (e) => {
-      if (e.action !== oneShot) return;
+      if (e.action !== activeOneShot) return;
+      const finished = e.action;
       run.enabled = true;
       run.reset();
       run.setEffectiveWeight(1);
-      run.crossFadeFrom(e.action, 0.25, false);
+      run.crossFadeFrom(finished, 0.25, false);
       run.play();
-      const dead = e.action;
-      setTimeout(() => { dead.stop(); dead.enabled = false; }, 350);
-      oneShot = null;
+      setTimeout(() => { finished.stop(); finished.enabled = false; }, 350);
+      activeOneShot = null;
+      idx = (idx + 1) % sequence.length;
+      pending = setTimeout(() => {
+        if (alive) playOneShot(sequence[idx]);
+      }, RUN_HOLD_MS);
     };
 
     mixer.addEventListener('finished', onFinished);
-    schedule();
+
+    // Prime the rig with run, then immediately transition to dive — the
+    // brief run state gives crossFadeFrom a hot action to blend out of.
+    startRunLoop();
+    pending = setTimeout(() => {
+      if (alive) playOneShot(sequence[idx]);
+    }, 60);
 
     return () => {
       alive = false;
@@ -150,13 +164,14 @@ function Rig() {
     };
   }, [actions, mixer]);
 
-  return <primitive ref={ref} object={base} scale={0.013} />;
+  return <primitive ref={ref} object={char.scene} scale={1} />;
 }
 
-useFBX.preload(RUNNING_URL);
-useFBX.preload(SLIDE_URL);
-useFBX.preload(DIVE_URL);
-useFBX.preload(LOOKBACK_URL);
-useFBX.preload(RIGHTTURN_URL);
+useGLTF.preload(CHAR_URL);
+useGLTF.preload(RUNNING_URL);
+useGLTF.preload(SLIDE_URL);
+useGLTF.preload(DIVE_URL);
+useGLTF.preload(LOOKBACK_URL);
+useGLTF.preload(RIGHTTURN_URL);
 
 export default Runner;

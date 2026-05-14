@@ -60,7 +60,7 @@ const LandingPage = () => {
         </nav>
 
         <div className="hud-corner hud-bl">
-          <div className="hud-mono small">CHASE / OFFSET (-3, 2.2, +6)</div>
+          <div className="hud-mono small">CHASE / OFFSET (-3, 2, -6)</div>
           <div className="hud-mono small">TARGET / SUBJECT-01</div>
           <div className="hud-mono small">STATUS / TRACKING</div>
         </div>

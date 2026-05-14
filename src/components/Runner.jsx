@@ -4,24 +4,20 @@ import { useFBX, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 
 /**
- * Runner — outer group is the *stable chase target* for the drone camera.
- * The Sine-wave drift lives on the outer group, so the camera keeps tracking
- * the same Object3D the whole time, regardless of which clip is currently
- * playing on the rig (idle run, slide, dive, right turn, look-back).
+ * Runner.
  *
- * Five Mixamo FBX files live in /public:
- *   - Running.fbx           (base loop — always playing)
- *   - Running Slide.fbx     (one-shot side dodge)
- *   - Run To Dive.fbx       (one-shot forward dive)
- *   - Run Look Back.fbx     (one-shot glance over shoulder)
- *   - Running Right Turn.fbx(one-shot lateral swing)
+ * - `/character.fbx`  → visual rig (skinned mesh + skeleton).
+ * - `/Running.fbx` and the four variant files → animation sources only;
+ *   their AnimationClips are retargeted onto the character's skeleton
+ *   (Mixamo bone names match across all of them).
  *
- * Only Running.fbx contributes geometry; the rest are loaded purely to lift
- * their AnimationClips and register them on the base rig's AnimationMixer.
- * Mixamo skeletons share bone names, so a clip from any FBX retargets cleanly.
+ * The outer group is the stable chase target for the drone camera — its
+ * ref stays mounted through Suspense swaps and clip transitions, so the
+ * camera never loses the subject.
  */
 
-const VARIANT_FILES = [
+const ANIMATION_SOURCES = [
+  { key: 'run',       url: '/Running.fbx' },
   { key: 'slide',     url: '/Running%20Slide.fbx' },
   { key: 'dive',      url: '/Run%20To%20Dive.fbx' },
   { key: 'lookback',  url: '/Run%20Look%20Back.fbx' },
@@ -32,7 +28,6 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (!groupRef.current) return;
-    // Lateral drift — two summed sines so the path doesn't feel periodic.
     groupRef.current.position.x =
       Math.sin(t * 0.6) * 1.4 + Math.sin(t * 1.7) * 0.4;
 
@@ -42,7 +37,8 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
   });
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]} rotation={[0, Math.PI, 0]}>
+      {/* rotation Y=π flips the rig so it faces +Z (toward camera in front) */}
       <FBXErrorBoundary fallback={<PlaceholderBody />}>
         <Suspense fallback={<PlaceholderBody />}>
           <FBXBody />
@@ -53,19 +49,19 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
 });
 
 function FBXBody() {
-  // Base rig — this is what we render.
-  const base = useFBX('/Running.fbx');
+  // Visual rig — only this gets rendered.
+  const character = useFBX('/character.fbx');
 
-  // Load each variant file just for its animation clips. Cached by URL.
-  const slide     = useFBX(VARIANT_FILES[0].url);
-  const dive      = useFBX(VARIANT_FILES[1].url);
-  const lookback  = useFBX(VARIANT_FILES[2].url);
-  const rightturn = useFBX(VARIANT_FILES[3].url);
+  // Animation-only FBXes — their .animations arrays carry the clips we want.
+  const runFBX       = useFBX(ANIMATION_SOURCES[0].url);
+  const slideFBX     = useFBX(ANIMATION_SOURCES[1].url);
+  const diveFBX      = useFBX(ANIMATION_SOURCES[2].url);
+  const lookbackFBX  = useFBX(ANIMATION_SOURCES[3].url);
+  const rightturnFBX = useFBX(ANIMATION_SOURCES[4].url);
 
   const innerRef = useRef();
 
-  // Build a single labelled clip list. Clone so we don't mutate the cached
-  // AnimationClip objects (which other components could share via HMR).
+  // Merge labelled clips into one list. Clone to avoid mutating cached objects.
   const clips = useMemo(() => {
     const out = [];
     const add = (sourceClips, name) => {
@@ -74,33 +70,47 @@ function FBXBody() {
       c.name = name;
       out.push(c);
     };
-    add(base.animations, 'run');
-    add(slide.animations, 'slide');
-    add(dive.animations, 'dive');
-    add(lookback.animations, 'lookback');
-    add(rightturn.animations, 'rightturn');
+    add(runFBX.animations, 'run');
+    add(slideFBX.animations, 'slide');
+    add(diveFBX.animations, 'dive');
+    add(lookbackFBX.animations, 'lookback');
+    add(rightturnFBX.animations, 'rightturn');
     return out;
-  }, [base, slide, dive, lookback, rightturn]);
+  }, [runFBX, slideFBX, diveFBX, lookbackFBX, rightturnFBX]);
 
   const { actions, mixer } = useAnimations(clips, innerRef);
 
-  // Material + shadow pass on the base mesh.
+  // Material + shadow pass on the character's meshes.
   useEffect(() => {
-    base.traverse((child) => {
+    character.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = false;
-        child.frustumCulled = false; // skinned meshes can mis-cull
-        if (child.material) {
-          child.material.metalness = 0.15;
-          child.material.roughness = 0.65;
-          child.material.envMapIntensity = 1.0;
+        child.frustumCulled = false; // skinned bounds are stale by default
+
+        // Mixamo characters often import as MeshPhongMaterial; upgrade
+        // to a standard PBR material so they pick up our scene lighting.
+        const mat = child.material;
+        if (mat && mat.isMeshPhongMaterial) {
+          const std = new THREE.MeshStandardMaterial({
+            map: mat.map,
+            normalMap: mat.normalMap,
+            color: mat.color,
+            roughness: 0.7,
+            metalness: 0.15,
+            envMapIntensity: 1.0,
+            skinning: true,
+          });
+          child.material = std;
+        } else if (mat && mat.isMeshStandardMaterial) {
+          mat.roughness = 0.7;
+          mat.metalness = 0.15;
         }
       }
     });
-  }, [base]);
+  }, [character]);
 
-  // Start the base run loop, then schedule random one-shot variants.
+  // Drive the animation state machine.
   useEffect(() => {
     const run = actions['run'];
     if (!run) return;
@@ -132,7 +142,6 @@ function FBXBody() {
 
     const scheduleNext = () => {
       if (!alive) return;
-      // 6–11 seconds between flourishes.
       const delay = 6000 + Math.random() * 5000;
       pendingTimeout = setTimeout(() => {
         if (!alive) return;
@@ -144,13 +153,12 @@ function FBXBody() {
 
     const onFinished = (e) => {
       if (e.action === currentOneShot) {
-        // Crossfade back to the base run loop.
-        const run = actions['run'];
-        if (run) {
-          run.reset();
-          run.setEffectiveWeight(1.0);
-          run.crossFadeFrom(e.action, 0.25, false);
-          run.play();
+        const r = actions['run'];
+        if (r) {
+          r.reset();
+          r.setEffectiveWeight(1.0);
+          r.crossFadeFrom(e.action, 0.25, false);
+          r.play();
         }
         currentOneShot = null;
       }
@@ -166,11 +174,11 @@ function FBXBody() {
     };
   }, [actions, mixer]);
 
-  // Mixamo exports in centimetres — 0.013 ≈ human scale in our 1u=1m world.
+  // Mixamo characters are exported in centimetres — 0.013 fits our 1u=1m world.
   return (
     <primitive
       ref={innerRef}
-      object={base}
+      object={character}
       scale={0.013}
       position={[0, 0, 0]}
     />
@@ -251,10 +259,9 @@ function PlaceholderBody() {
   );
 }
 
-// Preload all clips so the Suspense barrier resolves in one flight.
 try {
-  useFBX.preload('/Running.fbx');
-  VARIANT_FILES.forEach((v) => useFBX.preload(v.url));
+  useFBX.preload('/character.fbx');
+  ANIMATION_SOURCES.forEach((s) => useFBX.preload(s.url));
 } catch (_) { /* noop */ }
 
 export default Runner;

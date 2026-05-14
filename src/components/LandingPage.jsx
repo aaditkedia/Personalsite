@@ -1,22 +1,43 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DroneScene from './DroneScene';
 import './LandingPage.css';
 
 const LandingPage = () => {
   const hudRef = useRef();
+  const rootRef = useRef();
+  const [active, setActive] = useState(true);
+
+  // Pause the entire WebGL frameloop when the landing is scrolled off-screen.
+  // Single biggest perf win — projects/skills/experience can scroll smoothly
+  // because the GPU isn't grinding through a full 3D render every frame.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.05),
+      { threshold: [0, 0.05, 0.5, 1] }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Pause if the tab is hidden, too.
+  useEffect(() => {
+    const onVis = () => setActive((cur) => (document.hidden ? false : cur));
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
 
   return (
-    <section id="landing" className="landing">
+    <section id="landing" className="landing" ref={rootRef}>
       <div className="landing-canvas">
-        <DroneScene hudRef={hudRef} />
+        <DroneScene hudRef={hudRef} active={active} />
       </div>
 
-      {/* Lens-style overlays */}
       <div className="landing-vignette" aria-hidden="true" />
       <div className="landing-noise" aria-hidden="true" />
       <div className="landing-scanline" aria-hidden="true" />
 
-      {/* HTML UI overlay (drone HUD) */}
       <div className="landing-overlay">
         <div className="hud-corner hud-tl">
           <div className="hud-dot" />
@@ -39,7 +60,7 @@ const LandingPage = () => {
         </nav>
 
         <div className="hud-corner hud-bl">
-          <div className="hud-mono small">CHASE / OFFSET (-3, 2.2, -5)</div>
+          <div className="hud-mono small">CHASE / OFFSET (-3, 2.2, +6)</div>
           <div className="hud-mono small">TARGET / SUBJECT-01</div>
           <div className="hud-mono small">STATUS / TRACKING</div>
         </div>

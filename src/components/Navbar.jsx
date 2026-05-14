@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -12,21 +14,33 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  // Close the mobile sheet whenever the route changes.
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  // Non-landing routes always get the solid pill background — the
+  // transparent style only makes sense over the hero canvas.
+  const onLanding = location.pathname === '/';
+  const solid = scrolled || !onLanding;
 
   return (
-    <nav className={`navbar ${scrolled ? 'is-scrolled' : ''}`}>
+    <nav className={`navbar ${solid ? 'is-scrolled' : ''}`}>
       <div className="container nav-container">
         <div className="logo">
-          <a href="#landing">AK<span>//</span></a>
+          <NavLink to="/">AK<span>//</span></NavLink>
         </div>
         <div className={`nav-links ${isOpen ? 'active' : ''}`}>
-          <a href="#landing" onClick={() => setIsOpen(false)}>Home</a>
-          <a href="#projects" onClick={() => setIsOpen(false)}>Projects</a>
-          <a href="#skills" onClick={() => setIsOpen(false)}>Skills</a>
-          <a href="#experience" onClick={() => setIsOpen(false)}>Experience</a>
+          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/projects">Projects</NavLink>
+          <NavLink to="/skills">Skills</NavLink>
+          <NavLink to="/experience">Experience</NavLink>
         </div>
-        <button className="mobile-menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
+        <button
+          className="mobile-menu-toggle"
+          onClick={() => setIsOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
           <span className={`bar ${isOpen ? 'active' : ''}`}></span>
           <span className={`bar ${isOpen ? 'active' : ''}`}></span>
           <span className={`bar ${isOpen ? 'active' : ''}`}></span>

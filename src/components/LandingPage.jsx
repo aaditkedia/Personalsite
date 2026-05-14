@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import DroneScene from './DroneScene';
 import './LandingPage.css';
 
@@ -53,9 +54,9 @@ const LandingPage = () => {
         </div>
 
         <nav className="hud-nav" aria-label="Primary">
-          <a href="#projects" className="hud-link"><span>[ </span>PROJECTS<span> ]</span></a>
-          <a href="#experience" className="hud-link"><span>[ </span>EXPERIENCE<span> ]</span></a>
-          <a href="#skills" className="hud-link"><span>[ </span>ARSENAL<span> ]</span></a>
+          <Link to="/projects" className="hud-link"><span>[ </span>PROJECTS<span> ]</span></Link>
+          <Link to="/experience" className="hud-link"><span>[ </span>EXPERIENCE<span> ]</span></Link>
+          <Link to="/skills" className="hud-link"><span>[ </span>ARSENAL<span> ]</span></Link>
           <a href="https://cuecf.org" target="_blank" rel="noopener noreferrer" className="hud-link"><span>[ </span>CUECF / NON-PROFIT<span> ]</span></a>
         </nav>
 
@@ -67,7 +68,7 @@ const LandingPage = () => {
 
         <div className="hud-corner hud-br">
           <div className="hud-mono small" ref={hudRef}>X 0.00  Y 0.00  Z 0.00</div>
-          <a href="#projects" className="hud-cta">SCROLL TO ENTER ↓</a>
+          <Link to="/projects" className="hud-cta">ENTER PROJECTS →</Link>
         </div>
 
         <div className="hud-reticle" aria-hidden="true">

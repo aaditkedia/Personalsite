@@ -4,6 +4,17 @@
   min-height: 100vh;
 }
 
+/* Non-landing routes (Projects / Skills / Experience). The navbar is 64px
+   fixed, so push the page content down past it. */
+.page-shell {
+  padding-top: 64px;
+  flex: 1;
+}
+
+.page-shell > section {
+  background-color: var(--bg);
+}
+
 .footer {
   padding: 4rem 0;
   border-top: 1px solid var(--border);

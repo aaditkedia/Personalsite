@@ -74,6 +74,15 @@
   width: 100%;
 }
 
+/* react-router NavLink active state */
+.nav-links a.active {
+  color: #ffffff;
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+
 .mobile-menu-toggle {
   display: none;
   flex-direction: column;

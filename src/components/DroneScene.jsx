@@ -6,6 +6,7 @@ import {
   Vignette,
   DepthOfField,
 } from '@react-three/postprocessing';
+import { HalfFloatType } from 'three';
 import * as THREE from 'three';
 
 import Runner from './Runner';
@@ -38,7 +39,8 @@ const DroneScene = ({ hudRef, active = true }) => {
         scene.background = new THREE.Color('#03050d');
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.15;
-        gl.shadowMap.type = THREE.PCFSoftShadowMap;
+        // Let Three default the shadow map type — forcing PCFSoftShadowMap
+        // generates a deprecation warning in current Three builds.
         gl.outputColorSpace = THREE.SRGBColorSpace;
       }}
     >
@@ -75,7 +77,9 @@ const DroneScene = ({ hudRef, active = true }) => {
       {/* Light post-chain: Bloom for planet/neon glow, gentle DOF for depth,
           Vignette for lens framing. Dropped ChromaticAberration, Noise, and
           drei SoftShadows — those were the worst offenders for frame time. */}
-      <EffectComposer multisampling={0} disableNormalPass>
+      {/* HalfFloat framebuffer stops Chromium's glBlitFramebuffer
+          depth/stencil format spam when postprocessing samples the scene. */}
+      <EffectComposer multisampling={0} disableNormalPass frameBufferType={HalfFloatType}>
         <Bloom
           intensity={0.9}
           luminanceThreshold={0.65}

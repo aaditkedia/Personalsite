@@ -2,7 +2,10 @@
   position: relative;
   width: 100%;
   height: 100vh;
-  min-height: 640px;
+  /* dvh respects mobile address-bar collapse so the canvas isn't cropped
+     behind the safari toolbar on first paint. */
+  height: 100dvh;
+  min-height: 560px;
   overflow: hidden;
   background: #050810;
   padding: 0;
@@ -239,4 +242,44 @@
   .hud-nav { left: 1rem; gap: 0.2rem; }
   .hud-link { font-size: clamp(1.7rem, 7vw, 3rem); }
   .hud-reticle { display: none; }
+}
+
+@media (max-width: 640px) {
+  /* Phones: drop the noisy decorative chrome and let the brand + nav
+     breathe. Bottom-left/right status readouts and the REC tag get in
+     the way of the nav stack on short viewports. */
+  .hud-tr,
+  .hud-bl,
+  .hud-br .hud-mono { display: none; }
+
+  .hud-tl { top: 0.85rem; left: 0.9rem; gap: 0.5rem; }
+  .hud-br { bottom: 1rem; right: 0.9rem; }
+
+  .hud-brand { font-size: 0.85rem; letter-spacing: 0.14em; }
+  .hud-sub { font-size: 0.6rem; letter-spacing: 0.14em; }
+  .hud-dot { width: 8px; height: 8px; }
+
+  .hud-nav {
+    left: 0.9rem;
+    right: 0.9rem;
+    gap: 0.1rem;
+    /* Sit below the brand instead of vertically centered so the nav
+       can't collide with the top-left HUD on short phones. */
+    top: auto;
+    bottom: 4.5rem;
+    transform: none;
+  }
+  .hud-link {
+    font-size: clamp(1.5rem, 8.5vw, 2.4rem);
+    -webkit-text-stroke-width: 1px;
+  }
+  /* CUECF / NON-PROFIT is the long one — let it shrink instead of
+     overflowing on 360px-wide phones. */
+  .hud-link:last-child { font-size: clamp(1rem, 5.5vw, 1.6rem); }
+
+  .hud-cta {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    padding: 0.45rem 0.75rem;
+  }
 }

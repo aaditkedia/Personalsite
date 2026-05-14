@@ -54,9 +54,18 @@
 }
 
 @media (max-width: 640px) {
+  .experience-timeline { gap: 1.25rem; }
+  .experience-item {
+    padding: 1.25rem;
+    border-radius: 0.85rem;
+  }
+  .experience-item:hover { transform: none; }
   .experience-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
+  .experience-header h3 { font-size: 1.15rem; }
+  .organization { font-size: 0.98rem; margin-bottom: 0.6rem; }
+  .experience-item p { font-size: 0.92rem; }
 }

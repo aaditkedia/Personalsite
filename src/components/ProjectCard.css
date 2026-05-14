@@ -130,8 +130,26 @@
 }
 
 @media (max-width: 640px) {
+  .project-card {
+    padding: 1.4rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.85rem;
+  }
   .project-header {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.6rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.2rem;
   }
+  .project-header h3 { font-size: 1.25rem; }
+  .project-date {
+    margin-left: 0;
+    padding-top: 0;
+  }
+  .project-content {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  .project-section p { font-size: 0.92rem; }
 }

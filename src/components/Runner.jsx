@@ -6,7 +6,6 @@ import * as THREE from 'three';
 // Vite serves the site under /Personalsite/ on Pages, / in dev.
 const ASSET = (file) => `${import.meta.env.BASE_URL}${file}`;
 
-const CHAR_URL      = ASSET('char.glb');
 const RUNNING_URL   = ASSET('running.glb');
 const SLIDE_URL     = ASSET('runtoslide.glb');
 const DIVE_URL      = ASSET('runtodive.glb');
@@ -36,10 +35,10 @@ const Runner = React.forwardRef(function Runner(_, groupRef) {
 });
 
 function Rig() {
-  // char.glb supplies the skinned mesh + skeleton. The five action GLBs
-  // contribute only their AnimationClips — Mixamo's bone names match
-  // across exports so the clips bind onto char's rig cleanly.
-  const char     = useGLTF(CHAR_URL);
+  // running.glb is the base rig (matches the FBX flow which used
+  // Running.fbx — its skeleton is guaranteed to bind the run clip).
+  // The remaining action GLBs contribute their AnimationClips; Mixamo's
+  // `mixamorig:` bone names match across exports so they retarget cleanly.
   const runGLB   = useGLTF(RUNNING_URL);
   const slideGLB = useGLTF(SLIDE_URL);
   const diveGLB  = useGLTF(DIVE_URL);
@@ -74,13 +73,13 @@ function Rig() {
 
   // Shadow + culling pass on the character mesh.
   useEffect(() => {
-    char.scene.traverse((child) => {
+    runGLB.scene.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.frustumCulled = false;
       }
     });
-  }, [char]);
+  }, [runGLB]);
 
   // Deterministic sequence:
   //   dive → run → slide → run → rightturn → run → lookback → run → (loop)
@@ -164,10 +163,12 @@ function Rig() {
     };
   }, [actions, mixer]);
 
-  return <primitive ref={ref} object={char.scene} scale={1} />;
+  // Mixamo's GLB exports inherit FBX-style cm units — 0.013 matches the
+  // sizing the chase camera was tuned against. scale=1 puts the camera
+  // inside the chest cavity (invisible character).
+  return <primitive ref={ref} object={runGLB.scene} scale={0.013} />;
 }
 
-useGLTF.preload(CHAR_URL);
 useGLTF.preload(RUNNING_URL);
 useGLTF.preload(SLIDE_URL);
 useGLTF.preload(DIVE_URL);

@@ -159,17 +159,22 @@
   gap: 1.25rem;
 }
 
+.cuecf-project-tilt {
+  display: block;
+  height: 100%;
+}
+
 .cuecf-project {
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1.4rem;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease;
+  height: 100%;
 }
 
-.cuecf-project:hover {
+.cuecf-project-tilt:hover .cuecf-project {
   border-color: var(--primary);
-  transform: translateY(-2px);
 }
 
 .cuecf-project h4 {

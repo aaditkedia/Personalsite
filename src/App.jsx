@@ -7,6 +7,7 @@ import Skills from './components/Skills';
 import Experience from './components/Experience';
 import CUECF from './components/CUECF';
 import SiteAtmosphere from './components/SiteAtmosphere';
+import PageBackground3D from './components/PageBackground3D';
 import { initSmoothScroll, destroySmoothScroll } from './lib/smoothScroll';
 import './App.css';
 
@@ -55,8 +56,15 @@ function ScrollToTop() {
 
 // Non-landing routes need top padding so the fixed navbar doesn't overlap
 // section content. Landing renders the canvas full-bleed and doesn't need it.
+// PageBackground3D is the persistent ambient WebGL scene shared across the
+// inner pages (rotating chrome knot with parallax + bloom).
 function PageShell({ children }) {
-  return <main className="page-shell">{children}</main>;
+  return (
+    <>
+      <PageBackground3D />
+      <main className="page-shell">{children}</main>
+    </>
+  );
 }
 
 export default App;

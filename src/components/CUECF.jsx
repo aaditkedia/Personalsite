@@ -1,6 +1,7 @@
 import './CUECF.css';
 import { Reveal } from './anim/Reveal';
 import { Magnetic } from './anim/Magnetic';
+import { Tilt3D } from './anim/Tilt3D';
 import { AnimatedStat } from './anim/AnimatedStat';
 
 const stats = [
@@ -120,10 +121,14 @@ const CUECF = () => {
           <Reveal as="h3">Featured Projects</Reveal>
           <div className="cuecf-projects">
             {featured.map((p, i) => (
-              <Reveal key={p.title} delay={(i % 2) * 0.08} as="article" className="cuecf-project">
-                <h4>{p.title}</h4>
-                <p className="cuecf-project__partner">{p.partner}</p>
-                <p className="cuecf-project__blurb">{p.blurb}</p>
+              <Reveal key={p.title} delay={(i % 2) * 0.08}>
+                <Tilt3D max={6} className="cuecf-project-tilt">
+                  <article className="cuecf-project">
+                    <h4>{p.title}</h4>
+                    <p className="cuecf-project__partner">{p.partner}</p>
+                    <p className="cuecf-project__blurb">{p.blurb}</p>
+                  </article>
+                </Tilt3D>
               </Reveal>
             ))}
           </div>

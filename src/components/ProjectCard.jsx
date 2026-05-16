@@ -1,6 +1,7 @@
 import React from 'react';
 import './ProjectCard.css';
 import { Magnetic } from './anim/Magnetic';
+import { Tilt3D } from './anim/Tilt3D';
 import { FaJava, FaPython, FaReact, FaCode, FaNodeJs, FaDocker } from 'react-icons/fa';
 import {
   SiJavascript,
@@ -48,6 +49,7 @@ const tagToIcon = {
 
 const ProjectCard = ({ title, problem, solution, learned, tags = [], link, date }) => {
   return (
+    <Tilt3D max={5} scale={1.01} className="project-card-tilt">
     <div className="project-card">
       <div className="project-header">
         <div className="project-heading">
@@ -93,6 +95,7 @@ const ProjectCard = ({ title, problem, solution, learned, tags = [], link, date 
         </Magnetic>
       )}
     </div>
+    </Tilt3D>
   );
 };
 

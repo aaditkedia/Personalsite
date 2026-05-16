@@ -5,6 +5,7 @@ import LandingPage from './components/LandingPage';
 import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Experience from './components/Experience';
+import CUECF from './components/CUECF';
 import './App.css';
 
 // HashRouter avoids the GH-Pages SPA-fallback problem: /projects, /skills,
@@ -20,6 +21,7 @@ function App() {
           <Route path="/projects" element={<PageShell><Projects /></PageShell>} />
           <Route path="/skills" element={<PageShell><Skills /></PageShell>} />
           <Route path="/experience" element={<PageShell><Experience /></PageShell>} />
+          <Route path="/cuecf" element={<PageShell><CUECF /></PageShell>} />
         </Routes>
         <footer className="footer">
           <div className="container">

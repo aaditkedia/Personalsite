@@ -33,14 +33,7 @@ export default function LandingPage() {
           <Link to="/projects" className="scroll-landing__cta-link">Projects →</Link>
           <Link to="/experience" className="scroll-landing__cta-link">Experience</Link>
           <Link to="/skills" className="scroll-landing__cta-link">Skills</Link>
-          <a
-            href="https://cuecf.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="scroll-landing__cta-link"
-          >
-            CUECF
-          </a>
+          <Link to="/cuecf" className="scroll-landing__cta-link">CUECF</Link>
         </div>
       </div>
       <Vignette />

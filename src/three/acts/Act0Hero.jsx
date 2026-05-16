@@ -22,7 +22,7 @@ export function Act0Hero({ actIndex }) {
     ref.current.position.y = Math.sin(t * 0.4) * 0.08;
     ref.current.position.x = Math.cos(t * 0.3) * 0.04;
     if (matRef.current) {
-      const pulse = 0.55 + Math.sin(t * 0.6) * 0.08;
+      const pulse = 0.30 + Math.sin(t * 0.6) * 0.05;
       matRef.current.opacity = pulse * visible;
     }
     const s = (1.0 + local * 0.15) * visible;
@@ -47,7 +47,7 @@ export function Act0Hero({ actIndex }) {
         <meshBasicMaterial
           color={COLORS.glow}
           transparent
-          opacity={0.18}
+          opacity={0.09}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
         />

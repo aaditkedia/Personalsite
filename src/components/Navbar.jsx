@@ -35,6 +35,7 @@ const Navbar = () => {
           <NavLink to="/projects">Projects</NavLink>
           <NavLink to="/skills">Skills</NavLink>
           <NavLink to="/experience">Experience</NavLink>
+          <NavLink to="/cuecf">CUECF</NavLink>
         </div>
         <button
           className="mobile-menu-toggle"

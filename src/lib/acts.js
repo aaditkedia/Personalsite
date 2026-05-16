@@ -4,27 +4,27 @@ export const ACTS = [
   {
     i: 0,
     key: 'hero',
-    copy: 'Aadit Kedia — building at the intersection of *AI* and *humans*.',
+    copy: "Hi, I'm *Aadit Kedia*. Purdue freshman, *AI + Computer Science*.",
     align: 'left',
     small: 'Scroll to explore',
   },
   {
     i: 1,
     key: 'thesis',
-    copy: 'From models to *experiences*. From features to *feeling*.',
+    copy: 'Building *tools, agents, and communities* that put builders first.',
     align: 'center',
-    small: 'A portfolio in motion',
+    small: 'Projects · Experience · CUECF below',
   },
   {
     i: 2,
     key: 'cube',
-    copy: 'Tools, agents, communities — each project a *prototype* of an idea worth shipping.',
+    copy: 'Currently shipping *BoilerNet* — a network for Purdue founders, alumni, mentors, and investors.',
     align: 'right',
   },
   {
     i: 3,
     key: 'sphere',
-    copy: 'Every system has a *signal*. The work is to find it, then make it move.',
+    copy: 'Founded *CUECF* in 2023. 7+ environmental restoration projects, 1,500+ volunteer hours, $1,600+ raised.',
     align: 'right',
   },
   {
@@ -36,19 +36,19 @@ export const ACTS = [
   {
     i: 5,
     key: 'rings',
-    copy: 'Where reasoning meets *intuition*, real things get built.',
+    copy: 'Always learning, always shipping — *Python, TypeScript, R3F, LLM APIs.*',
     align: 'left',
   },
   {
     i: 6,
     key: 'iconfield',
-    copy: 'Projects, papers, prototypes — the work in *motion*.',
+    copy: '*Projects, papers, prototypes* — the work in motion.',
     align: 'center',
   },
   {
     i: 7,
     key: 'human',
-    copy: 'Made by *Aadit*. Keep scrolling.',
+    copy: 'Made by *Aadit*. Scroll up — or jump to my projects, experience, and CUECF below.',
     align: 'center',
   },
 ];

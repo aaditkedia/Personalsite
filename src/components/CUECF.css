@@ -8,6 +8,21 @@
   text-align: center;
 }
 
+.cuecf-logo {
+  width: 132px;
+  height: auto;
+  margin: 0 auto 1.25rem;
+  display: block;
+  filter: drop-shadow(0 6px 22px rgba(122, 167, 255, 0.28));
+}
+
+@media (max-width: 640px) {
+  .cuecf-logo {
+    width: 96px;
+    margin-bottom: 0.9rem;
+  }
+}
+
 .cuecf-eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.22em;

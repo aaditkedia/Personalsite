@@ -59,6 +59,12 @@ const CUECF = () => {
     <section id="cuecf" className="cuecf">
       <div className="container">
         <Reveal as="header" className="cuecf-hero">
+          <img
+            src={`${import.meta.env.BASE_URL}logo-cuecf.png`}
+            alt="CUECF logo"
+            className="cuecf-logo"
+            loading="eager"
+          />
           <p className="cuecf-eyebrow">Non-Profit · Founded 2023</p>
           <h2>CUECF — Community United Environmental Conservation Foundation</h2>
           <p className="cuecf-lede">

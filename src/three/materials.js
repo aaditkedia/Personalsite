@@ -13,10 +13,10 @@ export const COLORS = {
 
 export function makeChrome() {
   return new THREE.MeshStandardMaterial({
-    color: '#d0dffc',
+    color: '#9eb5d8',
     metalness: 1,
-    roughness: 0.18,
-    envMapIntensity: 1.4,
+    roughness: 0.32,
+    envMapIntensity: 0.75,
   });
 }
 
@@ -24,10 +24,10 @@ export function makeAccent() {
   return new THREE.MeshStandardMaterial({
     color: COLORS.accent,
     metalness: 1,
-    roughness: 0.22,
+    roughness: 0.32,
     emissive: COLORS.accentDeep,
-    emissiveIntensity: 0.12,
-    envMapIntensity: 1.3,
+    emissiveIntensity: 0.08,
+    envMapIntensity: 0.7,
   });
 }
 
@@ -41,11 +41,11 @@ export function makeTileBody() {
 
 export function makeCore() {
   return new THREE.MeshStandardMaterial({
-    color: '#a6c4ff',
+    color: '#7aa7ff',
     emissive: COLORS.glow,
-    emissiveIntensity: 2.8,
+    emissiveIntensity: 0.9,
     metalness: 0.4,
-    roughness: 0.2,
+    roughness: 0.35,
   });
 }
 

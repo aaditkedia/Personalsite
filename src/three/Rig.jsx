@@ -12,6 +12,10 @@ import { Act5Rings } from './acts/Act5Rings';
 import { Act6IconField } from './acts/Act6IconField';
 import { Act7ChromeHuman } from './acts/Act7ChromeHuman';
 
+const isMobile =
+  typeof window !== 'undefined' && window.innerWidth < 680;
+const BASE_Z = isMobile ? 6.8 : 4;
+
 export function Rig() {
   const groupRef = useRef(null);
 
@@ -32,7 +36,7 @@ export function Rig() {
       );
     }
 
-    state.camera.position.z = 4 + Math.sin(p * Math.PI) * 0.2;
+    state.camera.position.z = BASE_Z + Math.sin(p * Math.PI) * 0.2;
   });
 
   return (

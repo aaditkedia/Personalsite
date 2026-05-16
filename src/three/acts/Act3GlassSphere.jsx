@@ -36,19 +36,19 @@ export function Act3GlassSphere({ actIndex }) {
       <mesh>
         <sphereGeometry args={[1.1, 96, 96]} />
         <MeshTransmissionMaterial
-          thickness={1.0}
-          roughness={0.18}
+          thickness={0.55}
+          roughness={0.28}
           transmission={1}
-          ior={1.45}
-          chromaticAberration={0.26}
-          anisotropy={0.25}
-          distortion={0.15}
-          distortionScale={0.35}
-          temporalDistortion={0.06}
-          samples={5}
-          resolution={512}
+          ior={1.35}
+          chromaticAberration={0.05}
+          anisotropy={0.15}
+          distortion={0.06}
+          distortionScale={0.22}
+          temporalDistortion={0.025}
+          samples={4}
+          resolution={384}
           backside
-          color="#e8efff"
+          color="#c8d4ee"
         />
       </mesh>
       <mesh ref={inner} scale={0.42} material={accentMat}>

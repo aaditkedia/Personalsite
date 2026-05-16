@@ -28,19 +28,19 @@ export function Act2GlassCube({ actIndex }) {
     <group ref={ref} visible={false}>
       <RoundedBox args={[1.45, 1.45, 1.45]} radius={0.14} smoothness={5}>
         <MeshTransmissionMaterial
-          thickness={0.85}
-          roughness={0.16}
+          thickness={0.45}
+          roughness={0.28}
           transmission={1}
-          ior={1.42}
-          chromaticAberration={0.28}
-          anisotropy={0.32}
-          distortion={0.18}
-          distortionScale={0.4}
-          temporalDistortion={0.08}
-          samples={5}
-          resolution={512}
+          ior={1.35}
+          chromaticAberration={0.06}
+          anisotropy={0.18}
+          distortion={0.08}
+          distortionScale={0.25}
+          temporalDistortion={0.03}
+          samples={4}
+          resolution={384}
           backside
-          color="#e8efff"
+          color="#c8d4ee"
         />
       </RoundedBox>
     </group>

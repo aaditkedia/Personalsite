@@ -4,21 +4,21 @@
    =========================================================== */
 
 :root {
-  --sl-bg-top: #eae7de;
-  --sl-bg-bot: #f3f0e8;
-  --sl-glow-core: #f2c98c;
-  --sl-glow-mid: #d9a063;
-  --sl-copper: #c4733a;
-  --sl-copper-deep: #a8552b;
-  --sl-ink: #2a2722;
+  --sl-bg-top: #050810;
+  --sl-bg-bot: #0d1322;
+  --sl-glow-core: #7aa7ff;
+  --sl-glow-mid: #b78cff;
+  --sl-accent: #b78cff;
+  --sl-accent-deep: #6b4a99;
+  --sl-text: #f1f5ff;
+  --sl-text-dim: #8da3c4;
 }
 
-/* When the landing is mounted, flip body to warm bg and kill the global
-   scroll-behavior so Lenis owns the wheel. */
+/* When the landing is mounted, swap body bg/scroll-behavior so Lenis owns the wheel. */
 body.scroll-landing-active {
   background: linear-gradient(180deg, var(--sl-bg-top) 0%, var(--sl-bg-bot) 100%) !important;
   background-attachment: fixed !important;
-  color: var(--sl-ink) !important;
+  color: var(--sl-text) !important;
   overflow-x: hidden;
 }
 
@@ -50,10 +50,10 @@ html:has(body.scroll-landing-active) {
   z-index: 1;
   background: radial-gradient(
     45% 50% at 50% 55%,
-    rgba(242, 201, 140, 0.85) 0%,
-    rgba(217, 160, 99, 0.45) 30%,
-    rgba(196, 115, 58, 0.18) 55%,
-    rgba(234, 231, 222, 0) 75%
+    rgba(122, 167, 255, 0.55) 0%,
+    rgba(183, 140, 255, 0.30) 30%,
+    rgba(107, 74, 153, 0.14) 55%,
+    rgba(5, 8, 16, 0) 75%
   );
   filter: blur(20px);
   mix-blend-mode: screen;
@@ -67,7 +67,7 @@ html:has(body.scroll-landing-active) {
   background: radial-gradient(
     ellipse at center,
     transparent 50%,
-    rgba(42, 39, 34, 0.35) 100%
+    rgba(5, 8, 16, 0.65) 100%
   );
   mix-blend-mode: multiply;
 }
@@ -77,9 +77,9 @@ html:has(body.scroll-landing-active) {
   inset: 0;
   pointer-events: none;
   z-index: 6;
-  opacity: 0.08;
+  opacity: 0.10;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.16 0 0 0 0 0.15 0 0 0 0 0.13 0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.85 0 0 0 0 0.88 0 0 0 0 0.98 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   background-size: 180px 180px;
 }
 
@@ -89,14 +89,14 @@ html:has(body.scroll-landing-active) {
   left: 0;
   right: 0;
   height: 1px;
-  background: rgba(42, 39, 34, 0.1);
+  background: rgba(241, 245, 255, 0.08);
   z-index: 60;
   pointer-events: none;
 }
 
 .scroll-progress__fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--sl-copper-deep), var(--sl-glow-core));
+  background: linear-gradient(90deg, var(--sl-accent), var(--sl-glow-core));
   transform-origin: left center;
   transform: scaleX(0);
   will-change: transform;
@@ -138,13 +138,13 @@ html:has(body.scroll-landing-active) {
   font-size: clamp(1.6rem, 3.2vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
-  color: rgba(42, 39, 34, 0.78);
-  text-shadow: 0 0 22px rgba(244, 242, 236, 0.45);
+  color: rgba(241, 245, 255, 0.86);
+  text-shadow: 0 0 26px rgba(5, 8, 16, 0.6);
 }
 
 .scroll-section__copy b {
   font-weight: 600;
-  color: rgba(42, 39, 34, 0.96);
+  color: var(--sl-glow-core);
 }
 
 .scroll-section__copy--small {
@@ -152,7 +152,7 @@ html:has(body.scroll-landing-active) {
   font-size: 0.74rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(42, 39, 34, 0.45);
+  color: rgba(141, 163, 196, 0.65);
   font-weight: 500;
 }
 
@@ -206,20 +206,21 @@ html:has(body.scroll-landing-active) {
   font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(42, 39, 34, 0.85);
-  background: rgba(244, 242, 236, 0.4);
-  border: 1px solid rgba(42, 39, 34, 0.2);
+  color: rgba(241, 245, 255, 0.92);
+  background: rgba(13, 19, 34, 0.5);
+  border: 1px solid rgba(122, 167, 255, 0.32);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   padding: 0.7rem 1.2rem;
   border-radius: 999px;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .scroll-landing__cta-link:hover {
-  background: rgba(244, 242, 236, 0.7);
-  border-color: rgba(42, 39, 34, 0.45);
+  background: rgba(122, 167, 255, 0.18);
+  border-color: rgba(183, 140, 255, 0.6);
   transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(122, 167, 255, 0.25);
 }
 
 @media (max-width: 680px) {

@@ -7,7 +7,7 @@ import { useActState } from '../useActState';
 const PARTICLE_COUNT = 2600;
 
 const chrome = makeChrome();
-chrome.color.set('#F1D9A8');
+chrome.color.set('#d0dffc');
 chrome.roughness = 0.22;
 chrome.metalness = 1;
 
@@ -51,7 +51,7 @@ export function Act7ChromeHuman({ actIndex }) {
   const particleMat = useMemo(
     () =>
       new THREE.PointsMaterial({
-        color: '#F2C98C',
+        color: '#7aa7ff',
         size: 0.024,
         transparent: true,
         opacity: 0.85,

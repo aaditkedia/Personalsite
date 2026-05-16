@@ -1,7 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { makeChrome, makeCopper } from '../materials';
+import { makeChrome, makeAccent } from '../materials';
 import { useActState } from '../useActState';
 
 const RING_R = 1.05;
@@ -9,11 +9,11 @@ const TUBE_R = 0.07;
 
 const chromeA = makeChrome();
 const chromeB = makeChrome();
-const copper = makeCopper();
-copper.color.set('#D08246');
+const accent = makeAccent();
+accent.color.set('#b78cff');
 
 const tileMat = new THREE.MeshStandardMaterial({
-  color: '#23211e',
+  color: '#0d1322',
   roughness: 0.5,
   metalness: 0.55,
 });
@@ -61,7 +61,7 @@ export function Act4Ribbons({ actIndex }) {
       <mesh material={chromeB} rotation={[Math.PI / 2.2, 0, 0]}>
         <torusGeometry args={[RING_R, TUBE_R, 32, 220]} />
       </mesh>
-      <mesh material={copper} rotation={[0, Math.PI / 2.2, 0]}>
+      <mesh material={accent} rotation={[0, Math.PI / 2.2, 0]}>
         <torusGeometry args={[RING_R, TUBE_R * 0.85, 32, 220]} />
       </mesh>
       <mesh material={chromeA} rotation={[Math.PI / 3, Math.PI / 3, 0]}>

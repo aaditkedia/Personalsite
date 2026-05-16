@@ -30,12 +30,12 @@ export function Scene() {
       camera={{ position: [0, 0, 4], fov: 38, near: 0.1, far: 50 }}
     >
       <ambientLight intensity={0.35} />
-      <directionalLight position={[2.5, 3, 2]} intensity={0.9} color="#F4E2C2" />
-      <directionalLight position={[-2.5, 1, -1]} intensity={0.55} color="#D9A063" />
-      <pointLight position={[0, 0, 2]} intensity={0.4} color="#F2C98C" />
+      <directionalLight position={[2.5, 3, 2]} intensity={0.9} color="#d0dffc" />
+      <directionalLight position={[-2.5, 1, -1]} intensity={0.55} color="#7aa7ff" />
+      <pointLight position={[0, 0, 2]} intensity={0.4} color="#b78cff" />
 
       <Suspense fallback={null}>
-        <Environment preset="sunset" />
+        <Environment preset="city" />
         <Rig />
       </Suspense>
 

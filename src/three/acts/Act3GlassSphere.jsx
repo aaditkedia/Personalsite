@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { MeshTransmissionMaterial } from '@react-three/drei';
-import { makeCopper } from '../materials';
+import { makeAccent } from '../materials';
 import { useActState } from '../useActState';
 
-const copperMat = makeCopper();
+const accentMat = makeAccent();
 
 export function Act3GlassSphere({ actIndex }) {
   const ref = useRef(null);
@@ -48,10 +48,10 @@ export function Act3GlassSphere({ actIndex }) {
           samples={5}
           resolution={512}
           backside
-          color="#FAF4E8"
+          color="#e8efff"
         />
       </mesh>
-      <mesh ref={inner} scale={0.42} material={copperMat}>
+      <mesh ref={inner} scale={0.42} material={accentMat}>
         <octahedronGeometry args={[1, 0]} />
       </mesh>
     </group>

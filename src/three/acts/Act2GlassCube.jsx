@@ -40,7 +40,7 @@ export function Act2GlassCube({ actIndex }) {
           samples={5}
           resolution={512}
           backside
-          color="#FAF4E8"
+          color="#e8efff"
         />
       </RoundedBox>
     </group>

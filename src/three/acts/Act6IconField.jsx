@@ -7,14 +7,14 @@ import { useActState } from '../useActState';
 const COUNT = 16;
 
 const tileMat = new THREE.MeshStandardMaterial({
-  color: '#2c2925',
+  color: '#0d1322',
   metalness: 0.45,
   roughness: 0.55,
   transparent: true,
   opacity: 0.95,
 });
 
-const accents = ['#F2C98C', '#D9A063', '#C4733A', '#B68A56', '#F4F2EC'];
+const accents = ['#7aa7ff', '#9bb8ff', '#b78cff', '#a6c4ff', '#f1f5ff'];
 
 export function Act6IconField({ actIndex }) {
   const ref = useRef(null);

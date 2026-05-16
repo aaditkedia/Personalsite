@@ -1,14 +1,14 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { MeshTransmissionMaterial } from '@react-three/drei';
-import { makeAccent } from '../materials';
+import { makeChrome } from '../materials';
 import { useActState } from '../useActState';
 
-const accentMat = makeAccent();
+const chromeMat = makeChrome();
+chromeMat.roughness = 0.12;
+chromeMat.envMapIntensity = 1.1;
 
 export function Act3GlassSphere({ actIndex }) {
   const ref = useRef(null);
-  const inner = useRef(null);
   const { refresh } = useActState(actIndex);
 
   useFrame((state) => {
@@ -24,35 +24,12 @@ export function Act3GlassSphere({ actIndex }) {
     ref.current.position.y = Math.sin(t * 0.3) * 0.05;
     const s = (0.95 + local * 0.12) * visible;
     ref.current.scale.setScalar(s);
-
-    if (inner.current) {
-      inner.current.rotation.x = t * 0.55;
-      inner.current.rotation.y = t * 0.45;
-    }
   });
 
   return (
     <group ref={ref} visible={false}>
-      <mesh>
+      <mesh material={chromeMat}>
         <sphereGeometry args={[1.1, 96, 96]} />
-        <MeshTransmissionMaterial
-          thickness={0.55}
-          roughness={0.28}
-          transmission={1}
-          ior={1.35}
-          chromaticAberration={0.05}
-          anisotropy={0.15}
-          distortion={0.06}
-          distortionScale={0.22}
-          temporalDistortion={0.025}
-          samples={4}
-          resolution={384}
-          backside
-          color="#c8d4ee"
-        />
-      </mesh>
-      <mesh ref={inner} scale={0.42} material={accentMat}>
-        <octahedronGeometry args={[1, 0]} />
       </mesh>
     </group>
   );

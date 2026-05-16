@@ -1,7 +1,12 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { MeshTransmissionMaterial, RoundedBox } from '@react-three/drei';
+import { RoundedBox } from '@react-three/drei';
+import { makeChrome } from '../materials';
 import { useActState } from '../useActState';
+
+const chromeMat = makeChrome();
+chromeMat.roughness = 0.12;
+chromeMat.envMapIntensity = 1.1;
 
 export function Act2GlassCube({ actIndex }) {
   const ref = useRef(null);
@@ -26,23 +31,7 @@ export function Act2GlassCube({ actIndex }) {
 
   return (
     <group ref={ref} visible={false}>
-      <RoundedBox args={[1.45, 1.45, 1.45]} radius={0.14} smoothness={5}>
-        <MeshTransmissionMaterial
-          thickness={0.45}
-          roughness={0.28}
-          transmission={1}
-          ior={1.35}
-          chromaticAberration={0.06}
-          anisotropy={0.18}
-          distortion={0.08}
-          distortionScale={0.25}
-          temporalDistortion={0.03}
-          samples={4}
-          resolution={384}
-          backside
-          color="#c8d4ee"
-        />
-      </RoundedBox>
+      <RoundedBox args={[1.45, 1.45, 1.45]} radius={0.14} smoothness={5} material={chromeMat} />
     </group>
   );
 }

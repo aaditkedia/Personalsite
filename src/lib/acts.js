@@ -5,10 +5,11 @@ export const ACTS = [
     i: 0,
     key: 'hero',
     copy: "Hi, I'm *Aadit Kedia*. Purdue freshman, *AI + Computer Science*.",
-    align: 'left',
+    align: 'center',
     small: 'Scroll to explore',
     photo: 'aadit-headshot.png',
     photoAlt: 'Aadit Kedia',
+    photoSize: 'large',
   },
   {
     i: 1,

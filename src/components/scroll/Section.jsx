@@ -15,7 +15,9 @@ export function Section({ act }) {
             <img
               src={`${import.meta.env.BASE_URL}${act.photo}`}
               alt={act.photoAlt ?? ''}
-              className="scroll-section__photo"
+              className={`scroll-section__photo${
+                act.photoSize === 'large' ? ' scroll-section__photo--large' : ''
+              }`}
               loading="eager"
             />
           )}

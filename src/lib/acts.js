@@ -4,12 +4,11 @@ export const ACTS = [
   {
     i: 0,
     key: 'hero',
+    // Hero photo is rendered as a WebGL texture inside Act0Hero, not as HTML —
+    // the floating animation + glow ring depend on it being part of the scene.
     copy: "Hi, I'm *Aadit Kedia*. Purdue freshman, *AI + Computer Science*.",
     align: 'center',
     small: 'Scroll to explore',
-    photo: 'aadit-headshot.png',
-    photoAlt: 'Aadit Kedia',
-    photoSize: 'large',
   },
   {
     i: 1,

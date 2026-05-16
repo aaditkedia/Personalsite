@@ -168,6 +168,13 @@
   max-width: 30ch;
 }
 
+/* Hero (act 0) renders a WebGL portrait in the upper half of the viewport,
+   so pin the copy to the lower portion to avoid overlap. */
+.scroll-section[data-key="hero"] .scroll-section__copy {
+  align-self: end;
+  padding-bottom: 16vh;
+}
+
 .scroll-reveal {
   display: block;
   will-change: transform, opacity, filter;

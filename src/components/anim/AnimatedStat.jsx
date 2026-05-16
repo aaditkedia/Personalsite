@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // Parse "1,500+" → { num: 1500, prefix: '', suffix: '+', formatter: thousands }
 // Parse "$1,600+" → { num: 1600, prefix: '$', suffix: '+', formatter: thousands }
@@ -19,13 +19,16 @@ function parse(value) {
 
 export function AnimatedStat({ value, duration = 1.4 }) {
   const ref = useRef(null);
-  const [current, setCurrent] = useState(0);
-  const parsed = parse(value);
+  // Memoize so the effect deps don't change identity every render — that
+  // was causing the IntersectionObserver to tear down and re-fire the
+  // count-up infinitely.
+  const parsed = useMemo(() => parse(value), [value]);
+  const [current, setCurrent] = useState(parsed ? 0 : null);
 
   useEffect(() => {
-    if (!parsed) return;
+    if (!parsed) return undefined;
     const node = ref.current;
-    if (!node) return;
+    if (!node) return undefined;
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) {
@@ -33,12 +36,13 @@ export function AnimatedStat({ value, duration = 1.4 }) {
       return undefined;
     }
 
+    let rafId;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
+        io.disconnect();
         const start = performance.now();
         const ease = (t) => 1 - Math.pow(1 - t, 3);
-        let rafId;
         const tick = (now) => {
           const t = Math.min(1, (now - start) / (duration * 1000));
           setCurrent(parsed.num * ease(t));
@@ -47,13 +51,15 @@ export function AnimatedStat({ value, duration = 1.4 }) {
           }
         };
         rafId = requestAnimationFrame(tick);
-        io.disconnect();
-        return () => cancelAnimationFrame(rafId);
       },
       { threshold: 0.45 }
     );
     io.observe(node);
-    return () => io.disconnect();
+
+    return () => {
+      io.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [parsed, duration]);
 
   if (!parsed) {
@@ -63,7 +69,7 @@ export function AnimatedStat({ value, duration = 1.4 }) {
   return (
     <span ref={ref}>
       {parsed.prefix}
-      {parsed.format(current)}
+      {parsed.format(current ?? 0)}
       {parsed.suffix}
     </span>
   );

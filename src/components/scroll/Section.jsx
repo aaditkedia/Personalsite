@@ -11,6 +11,14 @@ export function Section({ act }) {
     >
       <div className="scroll-section__inner">
         <div className="scroll-section__copy">
+          {act.photo && (
+            <img
+              src={`${import.meta.env.BASE_URL}${act.photo}`}
+              alt={act.photoAlt ?? ''}
+              className="scroll-section__photo"
+              loading="eager"
+            />
+          )}
           <RevealText>{act.copy}</RevealText>
           {act.small && (
             <div className="scroll-section__copy--small">

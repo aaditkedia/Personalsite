@@ -7,6 +7,8 @@ export const ACTS = [
     copy: "Hi, I'm *Aadit Kedia*. Purdue freshman, *AI + Computer Science*.",
     align: 'left',
     small: 'Scroll to explore',
+    photo: 'aadit-headshot.png',
+    photoAlt: 'Aadit Kedia',
   },
   {
     i: 1,

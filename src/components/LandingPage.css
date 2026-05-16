@@ -173,6 +173,25 @@
   will-change: transform, opacity, filter;
 }
 
+.scroll-section__photo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1.4rem;
+  border: 2px solid rgba(122, 167, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(5, 8, 16, 0.55), 0 0 28px rgba(122, 167, 255, 0.25);
+}
+
+@media (max-width: 680px) {
+  .scroll-section__photo {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 1rem;
+  }
+}
+
 /* CTA footer at the bottom of the narrative */
 .scroll-landing__cta {
   position: relative;

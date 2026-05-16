@@ -1,5 +1,6 @@
 import React from 'react';
 import ProjectCard from './ProjectCard';
+import { Reveal } from './anim/Reveal';
 
 const projectsData = [
   {
@@ -98,10 +99,12 @@ const Projects = () => {
   return (
     <section id="projects" className="projects">
       <div className="container">
-        <h2>Featured Projects</h2>
+        <Reveal as="h2">Featured Projects</Reveal>
         <div className="projects-list">
           {projectsData.map((project, index) => (
-            <ProjectCard key={index} {...project} />
+            <Reveal key={index} amount={0.15}>
+              <ProjectCard {...project} />
+            </Reveal>
           ))}
         </div>
       </div>

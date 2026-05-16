@@ -1,5 +1,6 @@
 import React from 'react';
 import './Experience.css';
+import { Reveal } from './anim/Reveal';
 
 const experienceData = [
   {
@@ -32,17 +33,17 @@ const Experience = () => {
   return (
     <section id="experience" className="experience">
       <div className="container">
-        <h2>Professional Journey</h2>
+        <Reveal as="h2">Professional Journey</Reveal>
         <div className="experience-timeline">
           {experienceData.map((exp, index) => (
-            <div key={index} className="experience-item">
+            <Reveal key={index} amount={0.2} className="experience-item">
               <div className="experience-header">
                 <h3>{exp.title}</h3>
                 <span className="period">{exp.period}</span>
               </div>
               <h4 className="organization">{exp.organization}</h4>
               <p>{exp.description}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

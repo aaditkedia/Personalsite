@@ -1,5 +1,6 @@
 import React from 'react';
 import './Skills.css';
+import { Reveal } from './anim/Reveal';
 import { FaJava, FaPython, FaReact, FaNodeJs, FaGitAlt, FaDocker, FaLinux } from 'react-icons/fa';
 import {
   SiJavascript,
@@ -67,15 +68,15 @@ const Skills = () => {
   return (
     <section id="skills" className="skills">
       <div className="container">
-        <h2>Technical Arsenal</h2>
+        <Reveal as="h2">Technical Arsenal</Reveal>
         <div className="skills-widgets">
           {skillsData.map((skill, index) => (
-            <div key={index} className="skill-widget">
+            <Reveal key={index} delay={(index % 6) * 0.04} amount={0.4} className="skill-widget">
               <div className="skill-icon">
                 {skill.icon}
               </div>
               <span className="skill-name">{skill.name}</span>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

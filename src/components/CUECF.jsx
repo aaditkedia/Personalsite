@@ -1,4 +1,7 @@
 import './CUECF.css';
+import { Reveal } from './anim/Reveal';
+import { Magnetic } from './anim/Magnetic';
+import { AnimatedStat } from './anim/AnimatedStat';
 
 const stats = [
   { number: '15+', label: 'Restoration projects' },
@@ -55,7 +58,7 @@ const CUECF = () => {
   return (
     <section id="cuecf" className="cuecf">
       <div className="container">
-        <header className="cuecf-hero">
+        <Reveal as="header" className="cuecf-hero">
           <p className="cuecf-eyebrow">Non-Profit · Founded 2023</p>
           <h2>CUECF — Community United Environmental Conservation Foundation</h2>
           <p className="cuecf-lede">
@@ -63,19 +66,21 @@ const CUECF = () => {
             Founded and chaired by Aadit Kedia in June 2023 with a focus on tangible, on-the-ground
             restoration work alongside local townships, conservancies, and community partners.
           </p>
-        </header>
+        </Reveal>
 
         <div className="cuecf-stats">
-          {stats.map((s) => (
-            <div key={s.label} className="cuecf-stat">
-              <div className="cuecf-stat__number">{s.number}</div>
+          {stats.map((s, i) => (
+            <Reveal key={s.label} delay={i * 0.08} className="cuecf-stat">
+              <div className="cuecf-stat__number">
+                <AnimatedStat value={s.number} />
+              </div>
               <div className="cuecf-stat__label">{s.label}</div>
-            </div>
+            </Reveal>
           ))}
         </div>
 
         <div className="cuecf-grid">
-          <div className="cuecf-block">
+          <Reveal className="cuecf-block">
             <h3>Mission</h3>
             <p>
               Restore, protect, and educate. CUECF runs hands-on environmental projects —
@@ -83,9 +88,9 @@ const CUECF = () => {
               recycling, roadside cleanups — and pairs them with community education
               programs aimed at younger students.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="cuecf-block">
+          <Reveal delay={0.12} className="cuecf-block">
             <h3>Founder</h3>
             <p>
               Founded by <strong>Aadit Kedia</strong> in June 2023 while in high school in
@@ -94,44 +99,46 @@ const CUECF = () => {
               built the full-stack volunteer platform, and continues to lead project
               planning and partner outreach while studying AI + CS at Purdue.
             </p>
-          </div>
+          </Reveal>
         </div>
 
         <div className="cuecf-section">
-          <h3>Featured Projects</h3>
+          <Reveal as="h3">Featured Projects</Reveal>
           <div className="cuecf-projects">
-            {featured.map((p) => (
-              <article key={p.title} className="cuecf-project">
+            {featured.map((p, i) => (
+              <Reveal key={p.title} delay={(i % 2) * 0.08} as="article" className="cuecf-project">
                 <h4>{p.title}</h4>
                 <p className="cuecf-project__partner">{p.partner}</p>
                 <p className="cuecf-project__blurb">{p.blurb}</p>
-              </article>
+              </Reveal>
             ))}
           </div>
         </div>
 
         <div className="cuecf-section">
-          <h3>Partner Organizations</h3>
-          <ul className="cuecf-partners">
+          <Reveal as="h3">Partner Organizations</Reveal>
+          <Reveal as="ul" className="cuecf-partners" delay={0.05}>
             {partners.map((p) => (
               <li key={p}>{p}</li>
             ))}
-          </ul>
+          </Reveal>
         </div>
 
-        <div className="cuecf-cta">
+        <Reveal className="cuecf-cta">
           <p>
             Full project archive, photo galleries, team bios, and volunteer sign-up:
           </p>
-          <a
-            href="https://cuecf.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cuecf-cta__link"
-          >
-            Visit cuecf.org &rarr;
-          </a>
-        </div>
+          <Magnetic>
+            <a
+              href="https://cuecf.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cuecf-cta__link"
+            >
+              Visit cuecf.org &rarr;
+            </a>
+          </Magnetic>
+        </Reveal>
       </div>
     </section>
   );

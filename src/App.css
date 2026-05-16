@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 /* Non-landing routes (Projects / Skills / Experience). The navbar is 64px
@@ -11,14 +13,18 @@
   flex: 1;
 }
 
+/* Let pages render with transparent backgrounds so the global atmosphere
+   (radial glow + grain in SiteAtmosphere) shows through. */
 .page-shell > section {
-  background-color: var(--bg);
+  background-color: transparent;
 }
 
 .footer {
   padding: 4rem 0;
   border-top: 1px solid var(--border);
-  background-color: var(--surface);
+  background-color: rgba(13, 19, 34, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   text-align: center;
   margin-top: auto;
 }

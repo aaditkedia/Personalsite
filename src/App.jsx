@@ -6,14 +6,24 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Experience from './components/Experience';
 import CUECF from './components/CUECF';
+import SiteAtmosphere from './components/SiteAtmosphere';
+import { initSmoothScroll, destroySmoothScroll } from './lib/smoothScroll';
 import './App.css';
 
 // HashRouter avoids the GH-Pages SPA-fallback problem: /projects, /skills,
 // /experience all work as direct URLs without any server-side rewrite.
 function App() {
+  // Single Lenis instance for the whole app so smooth-scroll works on every
+  // route, not just the landing. LandingPage no longer owns this.
+  useEffect(() => {
+    initSmoothScroll();
+    return () => destroySmoothScroll();
+  }, []);
+
   return (
     <HashRouter>
       <ScrollToTop />
+      <SiteAtmosphere />
       <div className="app">
         <Navbar />
         <Routes>

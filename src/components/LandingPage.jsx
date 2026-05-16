@@ -1,23 +1,14 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Scene } from '../three/Scene';
 import { ACTS } from '../lib/acts';
 import { Section } from './scroll/Section';
 import { Glow, Vignette, Grain } from './scroll/Atmosphere';
 import { ProgressBar } from './scroll/ProgressBar';
-import { initSmoothScroll, destroySmoothScroll } from '../lib/smoothScroll';
 import './LandingPage.css';
 
+// Lenis smooth-scroll is now mounted once in App.jsx so it works on every
+// route — this component just renders the canvas + sections.
 export default function LandingPage() {
-  useEffect(() => {
-    document.body.classList.add('scroll-landing-active');
-    initSmoothScroll();
-    return () => {
-      destroySmoothScroll();
-      document.body.classList.remove('scroll-landing-active');
-    };
-  }, []);
-
   return (
     <div className="scroll-landing">
       <ProgressBar />

@@ -1,5 +1,6 @@
 import React from 'react';
 import './ProjectCard.css';
+import { Magnetic } from './anim/Magnetic';
 import { FaJava, FaPython, FaReact, FaCode, FaNodeJs, FaDocker } from 'react-icons/fa';
 import {
   SiJavascript,
@@ -85,9 +86,11 @@ const ProjectCard = ({ title, problem, solution, learned, tags = [], link, date 
       </div>
 
       {link && (
-        <a href={link} target="_blank" rel="noopener noreferrer" className="project-link">
-          View Project &rarr;
-        </a>
+        <Magnetic strength={0.2}>
+          <a href={link} target="_blank" rel="noopener noreferrer" className="project-link">
+            View Project &rarr;
+          </a>
+        </Magnetic>
       )}
     </div>
   );

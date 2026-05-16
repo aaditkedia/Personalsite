@@ -14,18 +14,8 @@
   --sl-text-dim: #8da3c4;
 }
 
-/* When the landing is mounted, swap body bg/scroll-behavior so Lenis owns the wheel. */
-body.scroll-landing-active {
-  background: linear-gradient(180deg, var(--sl-bg-top) 0%, var(--sl-bg-bot) 100%) !important;
-  background-attachment: fixed !important;
-  color: var(--sl-text) !important;
-  overflow-x: hidden;
-}
-
-html:has(body.scroll-landing-active) {
-  scroll-behavior: auto !important;
-}
-
+/* Body bg + scroll-behavior are now handled globally in index.css; the
+   landing just needs its own scoped styles. */
 .scroll-landing {
   position: relative;
   width: 100%;

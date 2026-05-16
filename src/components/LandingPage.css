@@ -1,285 +1,246 @@
-.landing {
+/* ===========================================================
+   Landing — scroll-narrative WebGL ("MAIN" style)
+   Scoped under .scroll-landing so it doesn't bleed into other routes.
+   =========================================================== */
+
+:root {
+  --sl-bg-top: #eae7de;
+  --sl-bg-bot: #f3f0e8;
+  --sl-glow-core: #f2c98c;
+  --sl-glow-mid: #d9a063;
+  --sl-copper: #c4733a;
+  --sl-copper-deep: #a8552b;
+  --sl-ink: #2a2722;
+}
+
+/* When the landing is mounted, flip body to warm bg and kill the global
+   scroll-behavior so Lenis owns the wheel. */
+body.scroll-landing-active {
+  background: linear-gradient(180deg, var(--sl-bg-top) 0%, var(--sl-bg-bot) 100%) !important;
+  background-attachment: fixed !important;
+  color: var(--sl-ink) !important;
+  overflow-x: hidden;
+}
+
+html:has(body.scroll-landing-active) {
+  scroll-behavior: auto !important;
+}
+
+.scroll-landing {
   position: relative;
   width: 100%;
-  height: 100vh;
-  /* dvh respects mobile address-bar collapse so the canvas isn't cropped
-     behind the safari toolbar on first paint. */
-  height: 100dvh;
-  min-height: 560px;
-  overflow: hidden;
-  background: #050810;
-  padding: 0;
-  margin: 0;
-  animation: none;
+  min-height: 100vh;
+  font-family: 'Hanken Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 300;
 }
 
-.landing-canvas {
-  position: absolute;
+/* Canvas pinned full-bleed behind sections */
+.scroll-scene-canvas {
+  position: fixed !important;
   inset: 0;
-  z-index: 1;
-}
-
-.landing-canvas canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Lens overlays */
-.landing-vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
+  z-index: 2;
   pointer-events: none;
-  background: radial-gradient(ellipse at center,
-    rgba(0, 0, 0, 0) 45%,
-    rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* Atmospheric layers */
+.scroll-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    45% 50% at 50% 55%,
+    rgba(242, 201, 140, 0.85) 0%,
+    rgba(217, 160, 99, 0.45) 30%,
+    rgba(196, 115, 58, 0.18) 55%,
+    rgba(234, 231, 222, 0) 75%
+  );
+  filter: blur(20px);
+  mix-blend-mode: screen;
+}
+
+.scroll-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(42, 39, 34, 0.35) 100%
+  );
   mix-blend-mode: multiply;
 }
 
-.landing-noise {
-  position: absolute;
+.scroll-grain {
+  position: fixed;
   inset: 0;
+  pointer-events: none;
   z-index: 6;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.16 0 0 0 0 0.15 0 0 0 0 0.13 0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+}
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(42, 39, 34, 0.1);
+  z-index: 60;
   pointer-events: none;
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
-  animation: noiseShift 1.6s steps(8) infinite;
 }
 
-@keyframes noiseShift {
-  0%   { transform: translate(0, 0); }
-  20%  { transform: translate(-3%, 2%); }
-  40%  { transform: translate(2%, -2%); }
-  60%  { transform: translate(-2%, -3%); }
-  80%  { transform: translate(3%, 1%); }
-  100% { transform: translate(0, 0); }
+.scroll-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sl-copper-deep), var(--sl-glow-core));
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
 }
 
-.landing-scanline {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.015) 0px,
-    rgba(255, 255, 255, 0.015) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  opacity: 0.6;
+/* Sections — override global `section { padding }` and border-tops */
+.scroll-landing .scroll-sections {
+  position: relative;
+  z-index: 3;
 }
 
-/* HUD overlay */
-.landing-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  color: #d9e6ff;
-  font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.02em;
+.scroll-landing .scroll-section {
+  position: relative;
+  min-height: 140vh;
+  padding: 0 6vw;
+  border: 0 !important;
 }
 
-.hud-corner {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  pointer-events: auto;
+.scroll-landing main section + section,
+.scroll-landing .scroll-section + .scroll-section {
+  border-top: 0 !important;
 }
 
-.hud-tl { top: 1.5rem; left: 2rem; flex-direction: row; align-items: center; gap: 0.75rem; }
-.hud-tr { top: 1.5rem; right: 2rem; align-items: flex-end; }
-.hud-bl { bottom: 1.75rem; left: 2rem; }
-.hud-br { bottom: 1.75rem; right: 2rem; align-items: flex-end; }
-
-.hud-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.9);
-  animation: blink 1.4s ease-in-out infinite;
+.scroll-section__inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  height: 100vh;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+.scroll-section__copy {
+  max-width: 28ch;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 3.2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: rgba(42, 39, 34, 0.78);
+  text-shadow: 0 0 22px rgba(244, 242, 236, 0.45);
 }
 
-.hud-stack { display: flex; flex-direction: column; line-height: 1.1; }
+.scroll-section__copy b {
+  font-weight: 600;
+  color: rgba(42, 39, 34, 0.96);
+}
 
-.hud-brand {
-  font-weight: 800;
-  font-size: 1.05rem;
+.scroll-section__copy--small {
+  margin-top: 1.4rem;
+  font-size: 0.74rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #ffffff;
-}
-
-.hud-sub {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  color: #7aa7ff;
-  text-transform: uppercase;
-}
-
-.hud-tag {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.25em;
-  color: #ff5a5a;
-  text-shadow: 0 0 8px rgba(255, 90, 90, 0.6);
-}
-
-.hud-mono {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  color: #9bb8ff;
-  text-transform: uppercase;
-}
-
-.hud-mono.small {
-  font-size: 0.7rem;
-  opacity: 0.85;
-}
-
-/* Center-left nav: huge, transparent, hover-fill */
-.hud-nav {
-  position: absolute;
-  left: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  pointer-events: auto;
-}
-
-.hud-link {
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
-  font-size: clamp(2.4rem, 5.5vw, 4.5rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(217, 230, 255, 0.45);
-  text-decoration: none;
-  line-height: 1.02;
-  transition: color 0.25s ease, -webkit-text-stroke-color 0.25s ease, transform 0.25s ease;
-  white-space: nowrap;
-}
-
-.hud-link span {
-  color: rgba(122, 167, 255, 0.45);
-  -webkit-text-stroke: 0;
+  color: rgba(42, 39, 34, 0.45);
   font-weight: 500;
 }
 
-.hud-link:hover {
-  color: #ffffff;
-  -webkit-text-stroke-color: #ffffff;
-  transform: translateX(6px);
+.scroll-section--left .scroll-section__copy {
+  grid-column: 1 / 2;
+  justify-self: start;
+  align-self: end;
+  padding-bottom: 18vh;
 }
 
-.hud-link:hover span {
-  color: #7aa7ff;
+.scroll-section--right .scroll-section__copy {
+  grid-column: 2 / 3;
+  justify-self: end;
+  align-self: center;
+  text-align: left;
 }
 
-.hud-cta {
-  pointer-events: auto;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.3em;
+.scroll-section--center .scroll-section__copy {
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: center;
+  text-align: center;
+  max-width: 30ch;
+}
+
+.scroll-reveal {
+  display: block;
+  will-change: transform, opacity, filter;
+}
+
+/* CTA footer at the bottom of the narrative */
+.scroll-landing__cta {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 8vh 6vw 12vh;
+  text-align: center;
+}
+
+.scroll-landing__cta-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.scroll-landing__cta-link {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #d9e6ff;
-  margin-top: 0.5rem;
-  padding: 0.55rem 0.95rem;
-  border: 1px solid rgba(217, 230, 255, 0.25);
+  color: rgba(42, 39, 34, 0.85);
+  background: rgba(244, 242, 236, 0.4);
+  border: 1px solid rgba(42, 39, 34, 0.2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 0.7rem 1.2rem;
   border-radius: 999px;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  backdrop-filter: blur(4px);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
 }
 
-.hud-cta:hover {
-  border-color: #7aa7ff;
-  color: #ffffff;
-  background: rgba(122, 167, 255, 0.12);
+.scroll-landing__cta-link:hover {
+  background: rgba(244, 242, 236, 0.7);
+  border-color: rgba(42, 39, 34, 0.45);
+  transform: translateY(-1px);
 }
 
-/* Center crosshair / reticle */
-.hud-reticle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 120px;
-  height: 120px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  opacity: 0.4;
-}
-
-.hud-reticle span {
-  position: absolute;
-  background: rgba(217, 230, 255, 0.6);
-}
-
-.hud-reticle span:nth-child(1) { top: 0; left: 50%; width: 1px; height: 18px; }
-.hud-reticle span:nth-child(2) { bottom: 0; left: 50%; width: 1px; height: 18px; }
-.hud-reticle span:nth-child(3) { left: 0; top: 50%; width: 18px; height: 1px; }
-.hud-reticle span:nth-child(4) { right: 0; top: 50%; width: 18px; height: 1px; }
-
-@media (max-width: 900px) {
-  .hud-tl, .hud-tr, .hud-bl, .hud-br { padding: 0.25rem; }
-  .hud-tl { top: 1rem; left: 1rem; }
-  .hud-tr { top: 1rem; right: 1rem; }
-  .hud-bl { bottom: 1rem; left: 1rem; }
-  .hud-br { bottom: 1rem; right: 1rem; }
-  .hud-nav { left: 1rem; gap: 0.2rem; }
-  .hud-link { font-size: clamp(1.7rem, 7vw, 3rem); }
-  .hud-reticle { display: none; }
-}
-
-@media (max-width: 640px) {
-  /* Phones: drop the noisy decorative chrome and let the brand + nav
-     breathe. Bottom-left/right status readouts and the REC tag get in
-     the way of the nav stack on short viewports. */
-  .hud-tr,
-  .hud-bl,
-  .hud-br .hud-mono { display: none; }
-
-  .hud-tl { top: 0.85rem; left: 0.9rem; gap: 0.5rem; }
-  .hud-br { bottom: 1rem; right: 0.9rem; }
-
-  .hud-brand { font-size: 0.85rem; letter-spacing: 0.14em; }
-  .hud-sub { font-size: 0.6rem; letter-spacing: 0.14em; }
-  .hud-dot { width: 8px; height: 8px; }
-
-  .hud-nav {
-    left: 0.9rem;
-    right: 0.9rem;
-    gap: 0.1rem;
-    /* Sit below the brand instead of vertically centered so the nav
-       can't collide with the top-left HUD on short phones. */
-    top: auto;
-    bottom: 4.5rem;
-    transform: none;
+@media (max-width: 680px) {
+  .scroll-landing .scroll-section {
+    padding: 0 4vw;
+    min-height: 120vh;
   }
-  .hud-link {
-    font-size: clamp(1.5rem, 8.5vw, 2.4rem);
-    -webkit-text-stroke-width: 1px;
+  .scroll-section__inner {
+    grid-template-columns: 1fr;
   }
-  /* CUECF / NON-PROFIT is the long one — let it shrink instead of
-     overflowing on 360px-wide phones. */
-  .hud-link:last-child { font-size: clamp(1rem, 5.5vw, 1.6rem); }
-
-  .hud-cta {
-    font-size: 0.62rem;
-    letter-spacing: 0.22em;
-    padding: 0.45rem 0.75rem;
+  .scroll-section--left .scroll-section__copy,
+  .scroll-section--right .scroll-section__copy,
+  .scroll-section--center .scroll-section__copy {
+    grid-column: 1;
+    justify-self: start;
+    text-align: left;
+    align-self: end;
+    padding-bottom: 14vh;
+    max-width: 22ch;
+  }
+  .scroll-section__copy {
+    font-size: clamp(1.3rem, 6vw, 2rem);
   }
 }

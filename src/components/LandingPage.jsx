@@ -1,82 +1,50 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import DroneScene from './DroneScene';
+import { Scene } from '../three/Scene';
+import { ACTS } from '../lib/acts';
+import { Section } from './scroll/Section';
+import { Glow, Vignette, Grain } from './scroll/Atmosphere';
+import { ProgressBar } from './scroll/ProgressBar';
+import { initSmoothScroll, destroySmoothScroll } from '../lib/smoothScroll';
 import './LandingPage.css';
 
-const LandingPage = () => {
-  const hudRef = useRef();
-  const rootRef = useRef();
-  const [active, setActive] = useState(true);
-
-  // Pause the entire WebGL frameloop when the landing is scrolled off-screen.
-  // Single biggest perf win — projects/skills/experience can scroll smoothly
-  // because the GPU isn't grinding through a full 3D render every frame.
+export default function LandingPage() {
   useEffect(() => {
-    const el = rootRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(
-      ([entry]) => setActive(entry.isIntersecting && entry.intersectionRatio > 0.05),
-      { threshold: [0, 0.05, 0.5, 1] }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  // Pause if the tab is hidden, too.
-  useEffect(() => {
-    const onVis = () => setActive((cur) => (document.hidden ? false : cur));
-    document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
+    document.body.classList.add('scroll-landing-active');
+    initSmoothScroll();
+    return () => {
+      destroySmoothScroll();
+      document.body.classList.remove('scroll-landing-active');
+    };
   }, []);
 
   return (
-    <section id="landing" className="landing" ref={rootRef}>
-      <div className="landing-canvas">
-        <DroneScene hudRef={hudRef} active={active} />
-      </div>
-
-      <div className="landing-vignette" aria-hidden="true" />
-      <div className="landing-noise" aria-hidden="true" />
-      <div className="landing-scanline" aria-hidden="true" />
-
-      <div className="landing-overlay">
-        <div className="hud-corner hud-tl">
-          <div className="hud-dot" />
-          <div className="hud-stack">
-            <div className="hud-brand">AADIT KEDIA</div>
-            <div className="hud-sub">// Software Engineer &amp; Founder</div>
-          </div>
-        </div>
-
-        <div className="hud-corner hud-tr">
-          <div className="hud-tag">REC ●</div>
-          <div className="hud-mono">CAM-01 / FPV / 4K</div>
-        </div>
-
-        <nav className="hud-nav" aria-label="Primary">
-          <Link to="/projects" className="hud-link"><span>[ </span>PROJECTS<span> ]</span></Link>
-          <Link to="/experience" className="hud-link"><span>[ </span>EXPERIENCE<span> ]</span></Link>
-          <Link to="/skills" className="hud-link"><span>[ </span>ARSENAL<span> ]</span></Link>
-          <a href="https://cuecf.org" target="_blank" rel="noopener noreferrer" className="hud-link"><span>[ </span>CUECF / NON-PROFIT<span> ]</span></a>
-        </nav>
-
-        <div className="hud-corner hud-bl">
-          <div className="hud-mono small">CHASE / OFFSET (-3, 2, -6)</div>
-          <div className="hud-mono small">TARGET / SUBJECT-01</div>
-          <div className="hud-mono small">STATUS / TRACKING</div>
-        </div>
-
-        <div className="hud-corner hud-br">
-          <div className="hud-mono small" ref={hudRef}>X 0.00  Y 0.00  Z 0.00</div>
-          <Link to="/projects" className="hud-cta">ENTER PROJECTS →</Link>
-        </div>
-
-        <div className="hud-reticle" aria-hidden="true">
-          <span /><span /><span /><span />
+    <div className="scroll-landing">
+      <ProgressBar />
+      <Glow />
+      <Scene />
+      <main className="scroll-sections">
+        {ACTS.map((act) => (
+          <Section key={act.key} act={act} />
+        ))}
+      </main>
+      <div className="scroll-landing__cta">
+        <div className="scroll-landing__cta-links">
+          <Link to="/projects" className="scroll-landing__cta-link">Projects →</Link>
+          <Link to="/experience" className="scroll-landing__cta-link">Experience</Link>
+          <Link to="/skills" className="scroll-landing__cta-link">Skills</Link>
+          <a
+            href="https://cuecf.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="scroll-landing__cta-link"
+          >
+            CUECF
+          </a>
         </div>
       </div>
-    </section>
+      <Vignette />
+      <Grain />
+    </div>
   );
-};
-
-export default LandingPage;
+}

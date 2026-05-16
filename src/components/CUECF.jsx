@@ -51,7 +51,7 @@ const partners = [
   'Lehigh Valley Audubon',
   'Hindu Temple Society',
   'Springhouse Middle School',
-  "Jay's Eagle Scout Project",
+  'Boy Scouts of America',
 ];
 
 const CUECF = () => {
@@ -98,13 +98,21 @@ const CUECF = () => {
 
           <Reveal delay={0.12} className="cuecf-block">
             <h3>Founder</h3>
-            <p>
-              Founded by <strong>Aadit Kedia</strong> in June 2023 while in high school in
-              Allentown, PA. CUECF was incorporated as an LLC and ran its first restoration
-              project (Whitehall Birdhouse Cleanup) the same year. Aadit serves as Chairman,
-              built the full-stack volunteer platform, and continues to lead project
-              planning and partner outreach while studying AI + CS at Purdue.
-            </p>
+            <div className="cuecf-founder">
+              <img
+                src={`${import.meta.env.BASE_URL}aadit-headshot.png`}
+                alt="Aadit Kedia"
+                className="cuecf-founder__photo"
+                loading="lazy"
+              />
+              <p>
+                Founded by <strong>Aadit Kedia</strong> in June 2023 while in high school in
+                Allentown, PA. CUECF was incorporated as an LLC and ran its first restoration
+                project (Whitehall Birdhouse Cleanup) the same year. Aadit serves as Chairman,
+                built the full-stack volunteer platform, and continues to lead project
+                planning and partner outreach while studying AI + CS at Purdue.
+              </p>
+            </div>
           </Reveal>
         </div>
 

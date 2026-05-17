@@ -6,6 +6,7 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Experience from './components/Experience';
 import CUECF from './components/CUECF';
+import Playground from './components/Playground';
 import SiteAtmosphere from './components/SiteAtmosphere';
 import PageBackground3D from './components/PageBackground3D';
 import { initSmoothScroll, destroySmoothScroll } from './lib/smoothScroll';
@@ -33,6 +34,7 @@ function App() {
           <Route path="/skills" element={<PageShell><Skills /></PageShell>} />
           <Route path="/experience" element={<PageShell><Experience /></PageShell>} />
           <Route path="/cuecf" element={<PageShell><CUECF /></PageShell>} />
+          <Route path="/playground" element={<PlaygroundShell><Playground /></PlaygroundShell>} />
         </Routes>
         <footer className="footer">
           <div className="container">
@@ -65,6 +67,12 @@ function PageShell({ children }) {
       <main className="page-shell">{children}</main>
     </>
   );
+}
+
+// Playground owns its own full-bleed canvas — skip the ambient background +
+// the page-shell padding so the runner gets the full viewport.
+function PlaygroundShell({ children }) {
+  return <main className="page-shell page-shell--bare">{children}</main>;
 }
 
 export default App;

@@ -19,6 +19,11 @@
   background-color: transparent;
 }
 
+/* Playground takes the full viewport — no top padding, full bleed. */
+.page-shell--bare {
+  padding-top: 0;
+}
+
 .footer {
   padding: 4rem 0;
   border-top: 1px solid var(--border);

@@ -25,6 +25,7 @@ export default function LandingPage() {
           <Link to="/experience" className="scroll-landing__cta-link">Experience</Link>
           <Link to="/skills" className="scroll-landing__cta-link">Skills</Link>
           <Link to="/cuecf" className="scroll-landing__cta-link">CUECF</Link>
+          <Link to="/playground" className="scroll-landing__cta-link">Playground</Link>
         </div>
       </div>
       <Vignette />
